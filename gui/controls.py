@@ -60,6 +60,37 @@ class ControlPanel(ttk.Frame):
         ttk.Checkbutton(frame, text="Gradient Colors", variable=self.gradient_var,
                         command=lambda: self.on_change("render")).pack(anchor="w")
 
+        # Effects section
+        fx_frame = ttk.LabelFrame(self, text="Effects", padding=5)
+        fx_frame.pack(fill="x", pady=(10, 0))
+
+        # Kaleidoscope
+        ttk.Label(fx_frame, text="Kaleidoscope Folds (0=off)").pack(anchor="w")
+        self.kaleidoscope_var = tk.IntVar(value=0)
+        kal_sub = ttk.Frame(fx_frame)
+        kal_sub.pack(fill="x")
+        ttk.Scale(kal_sub, from_=0, to=12, variable=self.kaleidoscope_var,
+                  orient="horizontal",
+                  command=lambda v: self._kal_changed(v)).pack(side="left", fill="x", expand=True)
+        self.kal_label = ttk.Label(kal_sub, text="0", width=3)
+        self.kal_label.pack(side="right")
+
+        # Gaussian glow
+        self.gauss_glow_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(fx_frame, text="Gaussian Bloom", variable=self.gauss_glow_var,
+                        command=lambda: self.on_change("render")).pack(anchor="w")
+
+        # Vignette
+        self.vignette_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(fx_frame, text="Vignette", variable=self.vignette_var,
+                        command=lambda: self.on_change("render")).pack(anchor="w")
+
+    def _kal_changed(self, value):
+        int_val = int(float(value))
+        self.kaleidoscope_var.set(int_val)
+        self.kal_label.config(text=str(int_val))
+        self.on_change("render")
+
     def build_params(self, param_defs):
         """Build parameter widgets from pattern's param definitions."""
         for w in self.param_frame.winfo_children():
@@ -131,6 +162,9 @@ class ControlPanel(ttk.Frame):
             "line_width": self.line_width_var.get(),
             "glow": self.glow_var.get(),
             "gradient": self.gradient_var.get(),
+            "kaleidoscope": self.kaleidoscope_var.get(),
+            "gauss_glow": self.gauss_glow_var.get(),
+            "vignette": self.vignette_var.get(),
         }
 
     def get_pattern_name(self):

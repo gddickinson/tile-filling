@@ -13,6 +13,9 @@ def render_to_image(
     glow=False,
     gradient=False,
     supersample=2,
+    kaleidoscope=0,
+    gauss_glow=False,
+    vignette=False,
 ):
     """Render drawing commands to a PIL Image.
 
@@ -25,6 +28,9 @@ def render_to_image(
         glow: Whether to add glow effect (draw wider translucent lines behind)
         gradient: Whether to color lines by position instead of index
         supersample: Render at Nx resolution and downscale for anti-aliasing
+        kaleidoscope: Number of symmetry folds (0=off)
+        gauss_glow: Apply gaussian blur bloom effect
+        vignette: Apply edge darkening vignette
 
     Returns:
         PIL.Image.Image
@@ -46,6 +52,19 @@ def render_to_image(
 
     if ss > 1:
         img = img.resize((width, height), Image.LANCZOS)
+
+    # Post-processing effects
+    if kaleidoscope >= 2:
+        from rendering.effects import apply_kaleidoscope
+        img = apply_kaleidoscope(img, kaleidoscope)
+
+    if gauss_glow:
+        from rendering.effects import apply_gaussian_glow
+        img = apply_gaussian_glow(img, radius=6, intensity=0.5)
+
+    if vignette:
+        from rendering.effects import apply_vignette
+        img = apply_vignette(img, strength=0.6)
 
     return img
 
@@ -109,7 +128,8 @@ def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
             draw.ellipse(bbox, outline=glow_color, width=glow_width)
 
 
-def render_high_res(commands, width, height, palette_name, line_width, glow, gradient, scale=4):
+def render_high_res(commands, width, height, palette_name, line_width, glow, gradient,
+                    scale=4, kaleidoscope=0, gauss_glow=False, vignette=False):
     """Render at high resolution for export."""
     return render_to_image(
         commands,
@@ -120,4 +140,7 @@ def render_high_res(commands, width, height, palette_name, line_width, glow, gra
         glow,
         gradient,
         supersample=1,  # Already at high res
+        kaleidoscope=kaleidoscope,
+        gauss_glow=gauss_glow,
+        vignette=vignette,
     )

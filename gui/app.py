@@ -130,6 +130,9 @@ class TileFillingApp:
                 line_width=settings["line_width"],
                 glow=settings["glow"],
                 gradient=settings["gradient"],
+                kaleidoscope=settings.get("kaleidoscope", 0),
+                gauss_glow=settings.get("gauss_glow", False),
+                vignette=settings.get("vignette", False),
             )
 
             self._current_image = img
@@ -189,6 +192,9 @@ class TileFillingApp:
                 line_width=settings["line_width"],
                 glow=settings["glow"],
                 gradient=settings["gradient"],
+                kaleidoscope=settings.get("kaleidoscope", 0),
+                gauss_glow=settings.get("gauss_glow", False),
+                vignette=settings.get("vignette", False),
             )
             img.save(path, dpi=(300, 300))
             self.status_var.set(f"Hi-res exported to {path}")
