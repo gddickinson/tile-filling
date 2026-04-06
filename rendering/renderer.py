@@ -16,6 +16,9 @@ def render_to_image(
     kaleidoscope=0,
     gauss_glow=False,
     vignette=False,
+    chromatic=False,
+    scanlines=False,
+    grain=False,
 ):
     """Render drawing commands to a PIL Image.
 
@@ -65,6 +68,18 @@ def render_to_image(
     if vignette:
         from rendering.effects import apply_vignette
         img = apply_vignette(img, strength=0.6)
+
+    if chromatic:
+        from rendering.effects import apply_chromatic_aberration
+        img = apply_chromatic_aberration(img, offset=3)
+
+    if scanlines:
+        from rendering.effects import apply_scan_lines
+        img = apply_scan_lines(img, spacing=3, opacity=0.3)
+
+    if grain:
+        from rendering.effects import apply_noise_grain
+        img = apply_noise_grain(img, amount=20)
 
     return img
 
@@ -129,7 +144,7 @@ def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
 
 
 def render_high_res(commands, width, height, palette_name, line_width, glow, gradient,
-                    scale=4, kaleidoscope=0, gauss_glow=False, vignette=False):
+                    scale=4, **effects):
     """Render at high resolution for export."""
     return render_to_image(
         commands,
@@ -139,8 +154,6 @@ def render_high_res(commands, width, height, palette_name, line_width, glow, gra
         line_width * scale,
         glow,
         gradient,
-        supersample=1,  # Already at high res
-        kaleidoscope=kaleidoscope,
-        gauss_glow=gauss_glow,
-        vignette=vignette,
+        supersample=1,
+        **effects,
     )

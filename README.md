@@ -1,24 +1,24 @@
 # Tile Filling Visualizer
 
-A Python GUI application for generating stunning mathematical and geometric art. 17 pattern types, 12 color palettes, 3D wireframe surfaces, post-processing effects, and real-time parameter control.
+A Python GUI application for generating stunning mathematical and geometric art. 22 pattern types, 12 color palettes, 3D wireframe surfaces, 9 post-processing effects, and real-time parameter control with presets.
 
 ## Gallery
 
 ### Classic Tilings
 
-**Decorated Grid** — Grid cells with layered geometric decorations: diagonals, diamonds, radial lines.
+**Decorated Grid** — Layered geometric decorations with chromatic aberration and bloom.
 
-![Decorated Grid](samples/decorated_grid.png)
+![Decorated Grid](samples/chromatic_grid.png)
 
-**Truchet Tiles (Cyberpunk)** — Randomly oriented quarter-circle arcs create emergent flowing curves.
+**Truchet Tiles (Cyberpunk)** — Quarter-circle arcs with gradient coloring and glow.
 
 ![Truchet Cyberpunk](samples/truchet_cyberpunk.png)
 
-**Islamic Star (Gold)** — Eight-pointed interlocking stars with geometric connections.
+**Islamic Star (Gold)** — Eight-pointed interlocking stars.
 
 ![Islamic Star](samples/islamic_gold.png)
 
-**Penrose Tiling (Ocean)** — Aperiodic golden-ratio tiling that never repeats.
+**Penrose Tiling (Ocean)** — Aperiodic golden-ratio tiling.
 
 ![Penrose Ocean](samples/penrose_ocean.png)
 
@@ -26,81 +26,85 @@ A Python GUI application for generating stunning mathematical and geometric art.
 
 ![Hexagonal Sunset](samples/hexagonal_sunset.png)
 
-**Sierpinski (Neon)** — Fractal triangle subdivision, self-similar at every scale.
+**Sierpinski (Neon)** — Fractal triangle subdivision.
 
 ![Sierpinski Neon](samples/sierpinski_neon.png)
 
-**Voronoi (Arctic)** — Organic cell tessellation with Lloyd relaxation.
+**Voronoi (Arctic)** — Organic cell tessellation.
 
 ![Voronoi Arctic](samples/voronoi_arctic.png)
 
-**Truchet Multi-Arc (Fire)** — Concentric arc variant for denser, richer patterns.
-
-![Truchet Fire](samples/truchet_fire.png)
-
 ### Mathematical Curves
 
-**Hilbert Space-Filling Curve (Cyberpunk)** — A single continuous path that fills a 2D region. Gradient coloring reveals the curve's traversal order.
+**Hilbert Space-Filling Curve (Cyberpunk)** — A single path that fills 2D space.
 
 ![Hilbert Curve](samples/hilbert_cyberpunk.png)
 
-**Spirograph (Neon)** — Overlaid hypotrochoid curves from rolling-circle geometry.
+**Spirograph (Neon)** — Overlaid hypotrochoid curves.
 
 ![Spirograph](samples/spirograph_neon.png)
 
-**L-System Plant (Forest)** — Fractal branching tree from recursive string rewriting.
+**L-System Plant (Forest)** — Fractal branching tree.
 
 ![L-System Plant](samples/lsystem_plant.png)
 
-**L-System Koch Snowflake (Ocean)** — Classic fractal coastline curve.
-
-![Koch Snowflake](samples/lsystem_koch.png)
-
-**Clifford Attractor (Sunset)** — Chaotic trajectory from a simple nonlinear dynamical system.
-
-![Clifford Attractor](samples/clifford_sunset.png)
-
-**De Jong Attractor (Cyberpunk)** — Another chaotic system with butterfly-like structure.
+**De Jong Attractor (Cyberpunk)** — Chaotic trajectory art.
 
 ![De Jong Attractor](samples/dejong_cyberpunk.png)
 
-**Moire Interference (Cyberpunk)** — Overlapping concentric circles create emergent patterns.
+**Harmonograph (Cyberpunk)** — Damped pendulum simulation.
 
-![Moire](samples/moire_circles.png)
+![Harmonograph](samples/harmonograph_cyberpunk.png)
 
-### 3D Patterns
+**Phyllotaxis (Sunset)** — Fibonacci sunflower spiral with connected arcs.
 
-**Wireframe Torus (Cyberpunk)** — Parametric 3D torus with perspective projection and depth-based coloring.
+![Phyllotaxis](samples/phyllotaxis_sunset.png)
 
-![Wireframe Torus](samples/wireframe_torus.png)
+**Guilloche (Gold)** — Fine-line engraving art with bloom.
 
-**Wireframe Klein Bottle (Ocean)** — The famous non-orientable surface rendered as a wireframe.
+![Guilloche](samples/guilloche_neon.png)
 
-![Klein Bottle](samples/wireframe_klein.png)
+### Flow & Organic Patterns
 
-**Trefoil Knot (Neon)** — 3D mathematical knot with gaussian bloom and vignette.
+**Flow Field (Ocean)** — Noise-driven particle traces.
 
-![Trefoil Knot](samples/trefoil_glow.png)
+![Flow Field](samples/flow_field_ocean.png)
 
-**Isometric Cubes (Pastel)** — 3D cube grid with wave-based height variation.
+**Flow Field with Scan Lines** — CRT-style retro effect.
 
-![Isometric Cubes](samples/iso_cubes.png)
+![Flow Scanlines](samples/flow_scanlines.png)
 
-### Advanced Patterns
+**Apollonian Gasket (Gold)** — Recursive tangent circle packing.
 
-**Chladni Figures (Gold)** — Nodal line patterns from vibrating plate wave equations.
+![Apollonian](samples/apollonian_gold.png)
 
-![Chladni](samples/chladni_gold.png)
-
-**Reaction-Diffusion (Arctic)** — Gray-Scott model organic Turing patterns as contour lines.
+**Reaction-Diffusion (Arctic)** — Gray-Scott organic Turing patterns.
 
 ![Reaction-Diffusion](samples/reaction_diffusion.png)
 
-### Post-Processing Effects
+### 3D Patterns
 
-**Kaleidoscope + Gaussian Bloom** — Any pattern can be transformed with N-fold symmetry and bloom effects.
+**Wireframe Torus (Cyberpunk)** — Perspective projection with depth coloring.
+
+![Wireframe Torus](samples/wireframe_torus.png)
+
+**Isometric Cubes (Pastel)** — 3D cube grid with wave height variation.
+
+![Isometric Cubes](samples/iso_cubes.png)
+
+**Trefoil Knot (Neon)** — 3D mathematical knot with bloom.
+
+![Trefoil Knot](samples/trefoil_glow.png)
+
+### Effects Showcase
+
+**Kaleidoscope + Bloom** — Any pattern with N-fold symmetry.
 
 ![Kaleidoscope](samples/kaleidoscope_truchet.png)
+
+**Chladni Figures (Gold)** — Wave equation nodal lines.
+
+![Chladni](samples/chladni_gold.png)
 
 ## Quick Start
 
@@ -111,14 +115,14 @@ python main.py
 
 Requires Python 3 and tkinter (included with most Python installations).
 
-## All 17 Pattern Types
+## All 22 Pattern Types
 
 | Category | Patterns |
 |----------|----------|
 | **Classic Tilings** | Grid, Decorated Grid, Islamic Star, Penrose, Truchet, Voronoi, Hexagonal, Sierpinski |
-| **Mathematical Curves** | Space-Filling Curves (Hilbert/Peano/Gosper), Spirograph, L-System, Strange Attractors, Moire |
+| **Mathematical Curves** | Space-Filling (Hilbert/Peano/Gosper), Spirograph, L-System, Attractors, Lissajous, Guilloche, Phyllotaxis, Moire |
 | **3D Patterns** | Isometric Cubes, 3D Wireframe (Torus/Klein/Trefoil/Sphere/Mobius) |
-| **Advanced** | Chladni Figures, Reaction-Diffusion |
+| **Advanced** | Flow Field, Apollonian Gasket, Chladni Figures, Reaction-Diffusion |
 
 ## 12 Color Palettes
 
@@ -126,11 +130,25 @@ Monochrome, Blueprint, Cyberpunk, Ocean, Sunset, Forest, Gold, Neon, Minimal Whi
 
 ## Rendering & Effects
 
-- **Line rendering:** Adjustable width, glow effect, gradient coloring
+- **Line rendering:** Adjustable width, glow, gradient coloring
 - **Anti-aliasing:** 2x supersampled rendering
-- **Post-processing:** Kaleidoscope symmetry (2-12 folds), Gaussian bloom, Vignette
+- **Post-processing:** Kaleidoscope (2-12 folds), Gaussian bloom, Vignette, Chromatic aberration, CRT scan lines, Film grain
 - **3D rendering:** Perspective/isometric projection, depth-based coloring
-- **Export:** Standard PNG and hi-res 4x PNG at 300 DPI
+- **Export:** Standard PNG, hi-res 4x PNG (300 DPI), batch random export (10 variations)
+
+## Keyboard Shortcuts
+
+| Key | Action |
+|-----|--------|
+| `Space` | Randomize all parameters |
+| `R` | Regenerate current pattern |
+| `E` | Export PNG |
+| `S` | Save preset |
+| `L` | Load preset |
+
+## Presets
+
+Save your favorite parameter combinations as JSON presets. Presets store the pattern type, all parameters, palette, and effect settings. Saved to the `presets/` folder.
 
 ## Adding New Patterns
 

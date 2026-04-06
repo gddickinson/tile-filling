@@ -85,6 +85,21 @@ class ControlPanel(ttk.Frame):
         ttk.Checkbutton(fx_frame, text="Vignette", variable=self.vignette_var,
                         command=lambda: self.on_change("render")).pack(anchor="w")
 
+        # Chromatic aberration
+        self.chromatic_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(fx_frame, text="Chromatic Aberration", variable=self.chromatic_var,
+                        command=lambda: self.on_change("render")).pack(anchor="w")
+
+        # Scan lines
+        self.scanlines_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(fx_frame, text="Scan Lines", variable=self.scanlines_var,
+                        command=lambda: self.on_change("render")).pack(anchor="w")
+
+        # Noise grain
+        self.grain_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(fx_frame, text="Film Grain", variable=self.grain_var,
+                        command=lambda: self.on_change("render")).pack(anchor="w")
+
     def _kal_changed(self, value):
         int_val = int(float(value))
         self.kaleidoscope_var.set(int_val)
@@ -165,6 +180,9 @@ class ControlPanel(ttk.Frame):
             "kaleidoscope": self.kaleidoscope_var.get(),
             "gauss_glow": self.gauss_glow_var.get(),
             "vignette": self.vignette_var.get(),
+            "chromatic": self.chromatic_var.get(),
+            "scanlines": self.scanlines_var.get(),
+            "grain": self.grain_var.get(),
         }
 
     def get_pattern_name(self):

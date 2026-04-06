@@ -17,6 +17,11 @@ from patterns.iso_cubes import IsoCubesPattern
 from patterns.wireframe3d import Wireframe3DPattern
 from patterns.chladni import ChladniPattern
 from patterns.reaction_diffusion import ReactionDiffusionPattern
+from patterns.flow_field import FlowFieldPattern
+from patterns.apollonian import ApollonianPattern
+from patterns.lissajous import LissajousPattern
+from patterns.guilloche import GuillochePattern
+from patterns.phyllotaxis import PhyllotaxisPattern
 
 PATTERN_REGISTRY = {
     # Classic tilings
@@ -34,10 +39,15 @@ PATTERN_REGISTRY = {
     "Spirograph": SpirographPattern,
     "Strange Attractors": AttractorPattern,
     "L-System": LSystemPattern,
+    "Lissajous": LissajousPattern,
+    "Guilloche": GuillochePattern,
+    "Phyllotaxis": PhyllotaxisPattern,
     # 3D patterns
     "Isometric Cubes": IsoCubesPattern,
     "3D Wireframe": Wireframe3DPattern,
     # Advanced
+    "Flow Field": FlowFieldPattern,
+    "Apollonian Gasket": ApollonianPattern,
     "Chladni Figures": ChladniPattern,
     "Reaction-Diffusion": ReactionDiffusionPattern,
 }
