@@ -27,7 +27,7 @@
 - README said "9 post-processing effects"; the app has 6 (kaleidoscope, bloom, vignette, chromatic aberration, scan
   lines, grain) plus glow and gradient line rendering. Corrected the README.
 
-### Needs George's decision (not changed)
+### Needs George's decision (first three items resolved later the same day, see below)
 - Sliders that do nothing: Grid `line_weight`, Space-Filling `connect` and `rounded` (both branches draw straight
   segments), Sierpinski `fill_mode`, Chladni `threshold`. Implement or remove? (The web About page says so.)
 - Penrose: `_extract_rhombs` pairs triangles into quadrilaterals `[a, b, a2, c]` that are not the P3 rhombs, so the
@@ -61,3 +61,9 @@
   length, golden-triangle angles, area conservation, every edge shared by two triangles or on the patch outline,
   rhomb angles 36/144 and 72/108, and thick/thin -> golden ratio. Regenerated `samples/penrose_ocean.png` and
   `samples/apollonian_gold.png` (defaults, with bloom for the gasket) with the fixed code.
+- Checks re-run: pytest 26 passed (test_web 15, test_rendering 3, test_patterns 8), node engine 158 checks / effects 7,
+  screenshots static (8 routes) and against `run_web.py` on 8123 all ok, Cross-check page 22/22, desktop GUI renders
+  the changed patterns. README screenshots refreshed.
+- Still open for George: the Apollonian "Four" seed (three inner circles at 0.36 R from the centre with radius 0.4 R
+  overlap each other, so no tangent circles exist and it now draws only its 4 seed circles; it was previously filled
+  with spurious circles). Make it a tangent configuration (which would match "Three") or drop it?
