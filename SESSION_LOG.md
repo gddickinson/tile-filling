@@ -14,3 +14,7 @@
   Pillow except a handful of kaleidoscope pixels where libm and V8 differ in the last bit of cos/sin);
   `tests/test_web.py` checks the fixtures are current with rtol 1e-9.
 - Static build and `scripts/screenshots.py` (static and against `run_web.py` on 8123) all ok; screenshots in `docs/img/`.
+
+### Bug fixes in the existing code (separate "Fix" commits, regression tests in `tests/test_rendering.py`)
+- Film grain halved the brightness of the whole image: `ImageChops.add(img, noise, scale=2, offset=-64)` is
+  img/2 + v/2. Now `scale=1, offset=-128` (img + v, clipped). The web port follows.

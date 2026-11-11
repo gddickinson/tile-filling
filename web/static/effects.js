@@ -134,13 +134,13 @@ export function scanLines(img, { spacing = 3, opacity = 0.4 } = {}) {
 }
 
 // apply_noise_grain: one randint(-amount, amount) per pixel from Python's global generator (seeded if seed given),
-// grey noise 128 + v, combined with ImageChops.add(img, noise, scale=2, offset=-64).
+// grey noise 128 + v, combined with ImageChops.add(img, noise, scale=1, offset=-128), i.e. img + v clipped.
 export function grain(img, { amount = 30, seed = null } = {}) {
   if (seed !== null) random.seed(seed);
   const out = copy(img);
   for (let i = 0; i < out.data.length; i += 4) {
     const n = 128 + random.randint(-amount, amount);
-    for (let c = 0; c < 3; c++) out.data[i + c] = Math.max(0, Math.min(255, Math.trunc((img.data[i + c] + n) / 2 + -64)));
+    for (let c = 0; c < 3; c++) out.data[i + c] = Math.max(0, Math.min(255, Math.trunc((img.data[i + c] + n) / 1 + -128)));
   }
   return out;
 }

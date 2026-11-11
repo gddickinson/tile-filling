@@ -133,9 +133,9 @@ def apply_noise_grain(img, amount=30, seed=None):
             v = random.randint(-amount, amount)
             pixels[x, y] = (128 + v, 128 + v, 128 + v)
 
-    # Apply as soft light blend
-    # Simplified: just add noise scaled down
-    return ImageChops.add(img, noise, scale=2, offset=-64)
+    # Add the noise around zero: out = img + (noise - 128) = img + v, clipped to 0-255.
+    # (scale=2, offset=-64 gave img/2 + v/2 and so halved the brightness of the whole image.)
+    return ImageChops.add(img, noise, scale=1, offset=-128)
 
 
 def apply_background_gradient(img, color1, color2, mode="radial"):
