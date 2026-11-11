@@ -25,6 +25,7 @@ class SierpinskiPattern(BasePattern):
         depth = params.get("depth", 5)
         mode = params.get("mode", 0)
         rotation = math.radians(params.get("rotation", 0))
+        self.fill = params.get("fill_mode", False)  # True: leaf shapes drawn as filled polygons
 
         commands = []
         cx = width / 2
@@ -61,6 +62,9 @@ class SierpinskiPattern(BasePattern):
     def _subdivide_triangle(self, commands, p1, p2, p3, depth):
         """Recursively subdivide triangle."""
         if depth == 0:
+            if self.fill:
+                commands.append(("polygon", [p1, p2, p3], 0, True))
+                return
             commands.append(("line", (*p1, *p2), 0))
             commands.append(("line", (*p2, *p3), 0))
             commands.append(("line", (*p3, *p1), 0))
@@ -84,6 +88,9 @@ class SierpinskiPattern(BasePattern):
     def _subdivide_carpet(self, commands, x, y, size, depth):
         """Recursively subdivide square for carpet."""
         if depth == 0:
+            if self.fill:
+                commands.append(("polygon", [(x, y), (x + size, y), (x + size, y + size), (x, y + size)], 0, True))
+                return
             # Draw square outline
             commands.append(("line", (x, y, x + size, y), 0))
             commands.append(("line", (x + size, y, x + size, y + size), 0))
@@ -117,6 +124,9 @@ class SierpinskiPattern(BasePattern):
     def _subdivide_hex(self, commands, verts, depth):
         """Recursively subdivide hexagon."""
         if depth == 0:
+            if self.fill:
+                commands.append(("polygon", list(verts), 0, True))
+                return
             for i in range(6):
                 p1 = verts[i]
                 p2 = verts[(i + 1) % 6]

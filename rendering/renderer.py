@@ -85,6 +85,11 @@ def render_to_image(
     return img
 
 
+def command_weight(cmd):
+    """Line-width multiplier of a line or circle command (optional 4th element, default 1)."""
+    return cmd[3] if len(cmd) > 3 else 1.0
+
+
 def _draw_main_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
     """Draw main lines."""
     total = len(commands) if len(commands) > 0 else 1
@@ -101,23 +106,23 @@ def _draw_main_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
 
         if cmd_type == "line":
             x1, y1, x2, y2 = data[0] * ss, data[1] * ss, data[2] * ss, data[3] * ss
-            draw.line([(x1, y1), (x2, y2)], fill=color, width=max(1, int(line_width)))
+            draw.line([(x1, y1), (x2, y2)], fill=color, width=max(1, int(line_width * command_weight(cmd))))
 
         elif cmd_type == "circle":
             cx, cy, r = data[0] * ss, data[1] * ss, data[2] * ss
             bbox = [cx - r, cy - r, cx + r, cy + r]
-            draw.ellipse(bbox, outline=color, width=max(1, int(line_width)))
+            draw.ellipse(bbox, outline=color, width=max(1, int(line_width * command_weight(cmd))))
 
         elif cmd_type == "polygon":
             points = [(p[0] * ss, p[1] * ss) for p in data]
             if len(points) >= 2:
-                draw.polygon(points, outline=color)
+                fill = color if len(cmd) > 3 and cmd[3] else None
+                draw.polygon(points, fill=fill, outline=color)
 
 
 def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
     """Draw a wider, dimmer pass behind lines for glow effect."""
     total = len(commands) if len(commands) > 0 else 1
-    glow_width = max(3, int(line_width * 3))
 
     for idx, cmd in enumerate(commands):
         cmd_type = cmd[0]
@@ -136,12 +141,12 @@ def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
 
         if cmd_type == "line":
             x1, y1, x2, y2 = data[0] * ss, data[1] * ss, data[2] * ss, data[3] * ss
-            draw.line([(x1, y1), (x2, y2)], fill=glow_color, width=glow_width)
+            draw.line([(x1, y1), (x2, y2)], fill=glow_color, width=max(3, int(line_width * command_weight(cmd) * 3)))
 
         elif cmd_type == "circle":
             cx, cy, r_val = data[0] * ss, data[1] * ss, data[2] * ss
             bbox = [cx - r_val - 2, cy - r_val - 2, cx + r_val + 2, cy + r_val + 2]
-            draw.ellipse(bbox, outline=glow_color, width=glow_width)
+            draw.ellipse(bbox, outline=glow_color, width=max(3, int(line_width * command_weight(cmd) * 3)))
 
 
 def render_high_res(commands, width, height, palette_name, line_width, glow, gradient,

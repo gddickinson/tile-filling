@@ -37,3 +37,12 @@
 - Reaction-Diffusion with the default feed/kill dies out below about 48 x 48 resolution (empty picture); fine at the default 80.
 - GitHub repo description says "8 pattern types"; the app has 22.
 - Web: SVG export and the canvas-size field are web additions; the browser cannot write the 300 DPI tag.
+
+## 2026-11-11 -- Approved pattern fixes (George), branch `web-interface`
+- Five sliders that did nothing now work, desktop and web alike (fixtures regenerated, `tests/test_patterns.py`):
+  Grid "Line Weight" (line-width multiplier, carried as an optional 4th command element that the renderer honours);
+  Space-Filling "Connected Line" off (each segment drawn alone, shortened by max(rounded, 0.15) at both ends) and
+  "Rounded Corners" (corners cut `rounded` of the way along both segments, joined by a 3-piece quadratic Bezier);
+  Sierpinski "Fill Outlines" (leaf triangles/squares/hexagons as filled polygons; `polygon` commands now honour their
+  documented `fill` flag); Chladni "Line Threshold" (extra contours in colour 1 at +-threshold x max|f|, outlining the
+  band where sand gathers; the nodal lines are unchanged).

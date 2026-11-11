@@ -74,7 +74,8 @@ def defaults(name):
 
 
 def command_stats(commands):
-    """Count, kinds, colour-index histogram, coordinate sum and bounding box (same order of additions as engine.js)."""
+    """Count, kinds, colour-index histogram, coordinate sum, bounding box, sum of explicit line weights and number of
+    filled polygons (same order of additions as engine.js)."""
     lines = circles = polygons = 0
     total = 0.0
     colors = {}
@@ -83,8 +84,15 @@ def command_stats(commands):
     def pt(x, y):
         bx[0], bx[1], bx[2], bx[3] = min(bx[0], x), min(bx[1], y), max(bx[2], x), max(bx[3], y)
 
-    for kind, data, c in commands:
+    weights = fills = 0
+    for cmd in commands:
+        kind, data, c = cmd[0], cmd[1], cmd[2]
         colors[str(c)] = colors.get(str(c), 0) + 1
+        if len(cmd) > 3:
+            if kind == "polygon":
+                fills += bool(cmd[3])
+            else:
+                weights += cmd[3]
         if kind == "line":
             lines += 1
             total += data[0] + data[1] + data[2] + data[3]
@@ -101,7 +109,7 @@ def command_stats(commands):
                 total += x + y
                 pt(x, y)
     return {"count": len(commands), "lines": lines, "circles": circles, "polygons": polygons, "sum": total,
-            "bbox": bx if commands else None, "colors": colors}
+            "bbox": bx if commands else None, "colors": colors, "weights": weights, "fills": fills}
 
 
 @lru_cache(maxsize=None)

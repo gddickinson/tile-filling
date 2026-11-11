@@ -29,7 +29,13 @@ FIX = ROOT / "tests" / "fixtures"
 SIZE = (360, 320)  # not square, so width/height mix-ups show
 # (pattern, overrides, global_seed): global_seed seeds Python's module-level random first (Grid jitter uses it unseeded)
 VARIANTS = [
-    ("Grid", {"jitter": 0.5, "cols": 7}, 7), ("Decorated Grid", {"decoration": 5, "rotation": 20.0, "cols": 5}, None),
+    ("Grid", {"jitter": 0.5, "cols": 7}, 7), ("Grid", {"line_weight": 2.5, "rows": 4}, None),
+    *[("Sierpinski", {"mode": m, "depth": 3, "fill_mode": True, "rotation": 15.0}, None) for m in (0, 1, 2)],
+    ("Space-Filling Curves", {"depth": 3, "rounded": 0.3}, None), ("Space-Filling Curves", {"depth": 3, "connect": False}, None),
+    ("Space-Filling Curves", {"curve_type": 2, "depth": 2, "rounded": 0.5}, None),
+    ("Space-Filling Curves", {"curve_type": 1, "depth": 2, "connect": False, "rounded": 0.25}, None),
+    ("Chladni Figures", {"threshold": 0.2, "resolution": 60}, None),
+    ("Chladni Figures", {"mode": 1, "threshold": 0.12, "resolution": 70}, None), ("Decorated Grid", {"decoration": 5, "rotation": 20.0, "cols": 5}, None),
     ("Islamic Star", {"rosette": True, "points": 7}, None), ("Islamic Star", {"points": 12, "interlace": 0.0}, None),
     ("Penrose Tiling", {"draw_triangles": True, "initial_shape": 1, "subdivisions": 4}, None),
     ("Truchet Tiles", {"style": 1, "seed": 7}, None), ("Truchet Tiles", {"style": 2, "cols": 9, "rows": 6}, None),
@@ -84,7 +90,8 @@ def pattern_cases():
         idx = sorted({0, 1, 2, *[k * (n - 1) // 9 for k in range(10)]} & set(range(n)))
         out.append({"name": name, "params": params, "global_seed": gseed, "width": w, "height": h,
                     "chaotic": (name, params.get("attractor")) in CHAOTIC, "stats": command_stats(cmds),
-                    "samples": [[i, cmds[i][0], list(cmds[i][1]), cmds[i][2]] for i in idx]})
+                    "samples": [[i, cmds[i][0], [list(v) if isinstance(v, tuple) else v for v in cmds[i][1]],
+                                 *cmds[i][2:]] for i in idx]})
         if out[-1]["chaotic"]:
             out[-1]["orbit"] = attractor_orbit(params)
     return out

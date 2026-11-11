@@ -29,6 +29,7 @@ export function rewrite(axiom, rules, depth, limit) {
 // --- space_filling.py -------------------------------------------------------------------------------------------------
 export function spaceFilling(width, height, params, margin = 40) {
   const type = get(params, 'curve_type', 0), depth = get(params, 'depth', 5);
+  const rounded = get(params, 'rounded', 0.0), connect = get(params, 'connect', true);
   let xs, ys;
   if (type === 0) [xs, ys] = hilbert(depth);
   else if (type === 1) [xs, ys] = turtle(rewrite('X', { X: 'XFYFX+F+YFXFY-F-XFYFX', Y: 'YFXFY-F-XFYFX+F+YFXFY' }, depth, 500000), 90, 'F');
@@ -36,15 +37,44 @@ export function spaceFilling(width, height, params, margin = 40) {
   const out = new Commands();
   if (xs.length < 2) return out;
   const { minX, minY, scale, ox, oy } = fitBox(xs, ys, width, height, margin);
-  const total = xs.length; // the "rounded" setting has no effect in space_filling.py: both branches draw straight segments
-  let px = ox + (xs[0] - minX) * scale, py = oy + (ys[0] - minY) * scale;
-  for (let i = 0; i < total - 1; i++) {
-    const nx = ox + (xs[i + 1] - minX) * scale, ny = oy + (ys[i + 1] - minY) * scale;
-    out.line(px, py, nx, ny, Math.floor((i * 3) / total));
-    px = nx; py = ny;
+  const total = xs.length, n = total - 1;
+  const P = i => [ox + (xs[i] - minX) * scale, oy + (ys[i] - minY) * scale];
+  const lerp = (p, q, t) => [p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])];
+  if (!connect) {                                          // each segment on its own, shortened at both ends
+    const gap = Math.max(rounded, GAP);
+    for (let i = 0; i < n; i++) {
+      const a = lerp(P(i), P(i + 1), gap), b = lerp(P(i), P(i + 1), 1 - gap);
+      out.line(a[0], a[1], b[0], b[1], Math.floor((i * 3) / total));
+    }
+  } else if (rounded > 0 && n > 1) {                       // corners cut and joined by quadratic Bezier curves
+    let start = P(0);
+    for (let i = 0; i < n; i++) {
+      const p1 = P(i), p2 = P(i + 1), c = Math.floor((i * 3) / total);
+      const end = i < n - 1 ? lerp(p1, p2, 1 - rounded) : p2;
+      if (end[0] !== start[0] || end[1] !== start[1]) out.line(start[0], start[1], end[0], end[1], c);
+      if (i < n - 1) {
+        const q = lerp(p2, P(i + 2), rounded);
+        let prev = end;
+        for (let k = 1; k <= CURVE_PIECES; k++) {
+          const t = k / CURVE_PIECES, u = 1 - t;
+          const pt = [u * u * end[0] + 2 * u * t * p2[0] + t * t * q[0], u * u * end[1] + 2 * u * t * p2[1] + t * t * q[1]];
+          out.line(prev[0], prev[1], pt[0], pt[1], c);
+          prev = pt;
+        }
+        start = q;
+      }
+    }
+  } else {
+    let [px, py] = P(0);
+    for (let i = 0; i < n; i++) {
+      const [nx, ny] = P(i + 1);
+      out.line(px, py, nx, ny, Math.floor((i * 3) / total));
+      px = nx; py = ny;
+    }
   }
   return out;
 }
+const GAP = 0.15, CURVE_PIECES = 3;                        // as space_filling.py
 
 function hilbert(depth) {
   const n = 2 ** depth, xs = [], ys = [];

@@ -24,6 +24,7 @@ class SpaceFillingPattern(BasePattern):
         curve_type = params.get("curve_type", 0)
         depth = params.get("depth", 5)
         rounded = params.get("rounded", 0.0)
+        connect = params.get("connect", True)
 
         if curve_type == 0:
             points = self._hilbert(depth)
@@ -36,7 +37,7 @@ class SpaceFillingPattern(BasePattern):
             return []
 
         # Normalize points to fit canvas
-        commands = self._scale_and_draw(points, width, height, margin, rounded)
+        commands = self._scale_and_draw(points, width, height, margin, rounded, connect)
         return commands
 
     def _hilbert(self, depth):
@@ -133,7 +134,7 @@ class SpaceFillingPattern(BasePattern):
 
         return points
 
-    def _scale_and_draw(self, points, width, height, margin, rounded):
+    def _scale_and_draw(self, points, width, height, margin, rounded, connect=True):
         """Scale points to canvas and generate draw commands."""
         if len(points) < 2:
             return []
@@ -160,19 +161,49 @@ class SpaceFillingPattern(BasePattern):
 
         commands = []
         total = len(scaled)
+        n = len(scaled) - 1  # number of segments
 
-        if rounded > 0 and len(scaled) > 2:
-            # Rounded corners: use midpoints as control approximation
-            for i in range(len(scaled) - 1):
+        if not connect:
+            # Disconnected: every segment drawn on its own, shortened at both ends so the path breaks at each vertex
+            gap = max(rounded, GAP)
+            for i in range(n):
+                a = _lerp(scaled[i], scaled[i + 1], gap)
+                b = _lerp(scaled[i], scaled[i + 1], 1 - gap)
+                commands.append(("line", (*a, *b), (i * 3) // total))
+        elif rounded > 0 and n > 1:
+            # Rounded corners: cut each corner `rounded` of the way along both segments and join the cuts with a
+            # quadratic Bezier curve whose control point is the corner
+            start = scaled[0]
+            for i in range(n):
+                p1, p2 = scaled[i], scaled[i + 1]
+                color_idx = (i * 3) // total
+                end = _lerp(p1, p2, 1 - rounded) if i < n - 1 else p2
+                if end != start:
+                    commands.append(("line", (*start, *end), color_idx))
+                if i < n - 1:
+                    q = _lerp(p2, scaled[i + 2], rounded)
+                    prev = end
+                    for k in range(1, CURVE_PIECES + 1):
+                        t = k / CURVE_PIECES
+                        u = 1 - t
+                        pt = (u * u * end[0] + 2 * u * t * p2[0] + t * t * q[0],
+                              u * u * end[1] + 2 * u * t * p2[1] + t * t * q[1])
+                        commands.append(("line", (*prev, *pt), color_idx))
+                        prev = pt
+                    start = q
+        else:
+            for i in range(n):
                 p1 = scaled[i]
                 p2 = scaled[i + 1]
                 color_idx = (i * 3) // total  # Cycle through colors by position
                 commands.append(("line", (*p1, *p2), color_idx))
-        else:
-            for i in range(len(scaled) - 1):
-                p1 = scaled[i]
-                p2 = scaled[i + 1]
-                color_idx = (i * 3) // total
-                commands.append(("line", (*p1, *p2), color_idx))
 
         return commands
+
+
+GAP = 0.15         # fraction cut from each end of a segment when "Connected Line" is off (at least `rounded`)
+CURVE_PIECES = 3   # line pieces per rounded corner
+
+
+def _lerp(p, q, t):
+    return (p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1]))

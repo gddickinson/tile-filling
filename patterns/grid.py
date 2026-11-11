@@ -25,6 +25,7 @@ class GridPattern(BasePattern):
         cols = params.get("cols", 10)
         rows = params.get("rows", 10)
         jitter = params.get("jitter", 0.0)
+        weight = params.get("line_weight", 1.0)  # line-width multiplier for every grid line
 
         commands = []
         w = width - 2 * margin
@@ -36,13 +37,13 @@ class GridPattern(BasePattern):
         for i in range(cols + 1):
             x = margin + i * cw
             jx = x + (random.random() - 0.5) * cw * jitter if jitter > 0 else x
-            commands.append(("line", (jx, margin, jx, margin + h), 0))
+            commands.append(("line", (jx, margin, jx, margin + h), 0, weight))
 
         # Horizontal lines
         for j in range(rows + 1):
             y = margin + j * ch
             jy = y + (random.random() - 0.5) * ch * jitter if jitter > 0 else y
-            commands.append(("line", (margin, jy, margin + w, jy), 0))
+            commands.append(("line", (margin, jy, margin + w, jy), 0, weight))
 
         return commands
 

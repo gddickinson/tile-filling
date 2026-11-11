@@ -1,14 +1,20 @@
 // Helpers shared by the pattern ports: the command list, utils/geometry.py, rendering/projection.py,
 // rendering/colors.py, and Python semantics JS lacks (round() half-to-even, %, complex ** 0.5).
 
-// Drawing commands (patterns/base.py): ("line", (x1,y1,x2,y2), c), ("circle", (cx,cy,r), c), ("polygon", pts, c).
-// Stored flat so that patterns with millions of segments stay small: kind[i] is 0 line / 1 circle / 2 polygon.
+// Drawing commands (patterns/base.py): ("line", (x1,y1,x2,y2), c[, weight]), ("circle", (cx,cy,r), c[, weight]),
+// ("polygon", pts, c[, fill]). Stored flat so that patterns with millions of segments stay small: kind[i] is
+// 0 line / 1 circle / 2 polygon; ex[i] is the optional 4th element (NaN when absent; fill stored as 1 / 0).
 export class Commands {
-  constructor() { this.kind = []; this.col = []; this.xy = []; }
+  constructor() { this.kind = []; this.col = []; this.xy = []; this.ex = []; }
   get length() { return this.kind.length; }
-  line(x1, y1, x2, y2, c) { this.kind.push(0); this.col.push(c); this.xy.push(x1, y1, x2, y2); }
-  circle(cx, cy, r, c) { this.kind.push(1); this.col.push(c); this.xy.push(cx, cy, r); }
-  polygon(pts, c) { this.kind.push(2); this.col.push(c); this.xy.push(pts.length); for (const [x, y] of pts) this.xy.push(x, y); }
+  line(x1, y1, x2, y2, c, w) { this.kind.push(0); this.col.push(c); this.ex.push(w ?? NaN); this.xy.push(x1, y1, x2, y2); }
+  circle(cx, cy, r, c, w) { this.kind.push(1); this.col.push(c); this.ex.push(w ?? NaN); this.xy.push(cx, cy, r); }
+  polygon(pts, c, fill) {
+    this.kind.push(2); this.col.push(c); this.ex.push(fill === undefined ? NaN : fill ? 1 : 0);
+    this.xy.push(pts.length); for (const [x, y] of pts) this.xy.push(x, y);
+  }
+  weight(i) { const e = this.ex[i]; return Number.isNaN(e) || e === undefined ? 1 : e; }  // line/circle width multiplier
+  filled(i) { return this.ex[i] === 1; }
   // Visit every command: fn(kind, colorIndex, xy, offset, index). Polygons: xy[offset] = point count, then x, y pairs.
   forEach(fn) {
     let o = 0;
@@ -18,13 +24,17 @@ export class Commands {
       o += k === 0 ? 4 : k === 1 ? 3 : 1 + 2 * this.xy[o];
     }
   }
-  // Python-shaped list [type, data, colorIndex] (tests and small exports only).
+  // Python-shaped list [type, data, colorIndex(, weight | fill)] (tests and small exports only).
   toList() {
     const out = [];
-    this.forEach((k, c, xy, o) => {
-      if (k === 0) out.push(['line', xy.slice(o, o + 4), c]);
-      else if (k === 1) out.push(['circle', xy.slice(o, o + 3), c]);
-      else out.push(['polygon', Array.from({ length: xy[o] }, (_, j) => [xy[o + 1 + 2 * j], xy[o + 2 + 2 * j]]), c]);
+    this.forEach((k, c, xy, o, i) => {
+      let cmd;
+      if (k === 0) cmd = ['line', Array.from(xy.slice(o, o + 4)), c];
+      else if (k === 1) cmd = ['circle', Array.from(xy.slice(o, o + 3)), c];
+      else cmd = ['polygon', Array.from({ length: xy[o] }, (_, j) => [xy[o + 1 + 2 * j], xy[o + 2 + 2 * j]]), c];
+      const e = this.ex[i];
+      if (!Number.isNaN(e) && e !== undefined) cmd.push(k === 2 ? e === 1 : e);
+      out.push(cmd);
     });
     return out;
   }

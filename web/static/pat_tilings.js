@@ -8,17 +8,18 @@ const get = (params, k, d) => (params[k] ?? d);
 // --- grid.py: GridPattern -------------------------------------------------------------------------------------------
 export function grid(width, height, params, margin = 40) {
   const cols = get(params, 'cols', 10), rows = get(params, 'rows', 10), jitter = get(params, 'jitter', 0.0);
+  const weight = get(params, 'line_weight', 1.0);         // line-width multiplier for every grid line
   const out = new Commands();
   const w = width - 2 * margin, h = height - 2 * margin, cw = w / cols, ch = h / rows;
   for (let i = 0; i < cols + 1; i++) {   // jitter draws from the shared (unseeded) global generator, as in Python
     const x = margin + i * cw;
     const jx = jitter > 0 ? x + (random.random() - 0.5) * cw * jitter : x;
-    out.line(jx, margin, jx, margin + h, 0);
+    out.line(jx, margin, jx, margin + h, 0, weight);
   }
   for (let j = 0; j < rows + 1; j++) {
     const y = margin + j * ch;
     const jy = jitter > 0 ? y + (random.random() - 0.5) * ch * jitter : y;
-    out.line(margin, jy, margin + w, jy, 0);
+    out.line(margin, jy, margin + w, jy, 0, weight);
   }
   return out;
 }

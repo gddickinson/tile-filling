@@ -139,7 +139,7 @@ function cell(out, v00, v10, v01, v11, x0, y0, x1, y1, c, eps) {
 // --- chladni.py -------------------------------------------------------------------------------------------------------
 export function chladni(width, height, params, margin = 40) {
   const m = get(params, 'm', 5), n = get(params, 'n', 3), res = get(params, 'resolution', 150);
-  const mode = get(params, 'mode', 0);                     // 'threshold' is read but not used by chladni.py
+  const mode = get(params, 'mode', 0), threshold = get(params, 'threshold', 0.05);
   const out = new Commands();
   const w = width - 2 * margin, h = height - 2 * margin, size = Math.min(w, h);
   const ox = margin + (w - size) / 2, oy = margin + (h - size) / 2, N1 = res + 1, g = new Float64Array(N1 * N1);
@@ -155,13 +155,21 @@ export function chladni(width, height, params, margin = 40) {
     }
   }
   const cw = size / res;
-  for (let i = 0; i < res; i++) {
-    for (let j = 0; j < res; j++) {
-      const v00 = g[i * N1 + j], v10 = g[(i + 1) * N1 + j], v01 = g[i * N1 + j + 1], v11 = g[(i + 1) * N1 + j + 1];
-      if (Number.isNaN(v00) || Number.isNaN(v10) || Number.isNaN(v01) || Number.isNaN(v11)) continue;
-      const x0 = ox + i * cw, y0 = oy + j * cw;
-      cell(out, v00, v10, v01, v11, x0, y0, x0 + cw, y0 + cw, 0, 0);
+  const contour = (level, c) => {
+    for (let i = 0; i < res; i++) {
+      for (let j = 0; j < res; j++) {
+        const v00 = g[i * N1 + j] - level, v10 = g[(i + 1) * N1 + j] - level, v01 = g[i * N1 + j + 1] - level, v11 = g[(i + 1) * N1 + j + 1] - level;
+        if (Number.isNaN(v00) || Number.isNaN(v10) || Number.isNaN(v01) || Number.isNaN(v11)) continue;
+        const x0 = ox + i * cw, y0 = oy + j * cw;
+        cell(out, v00, v10, v01, v11, x0, y0, x0 + cw, y0 + cw, c, 0);
+      }
     }
+  };
+  contour(0.0, 0);                                         // nodal lines
+  if (threshold > 0) {                                     // band |f| < threshold * max|f| (where sand gathers)
+    let peak = 0;
+    for (let i = 0; i < N1; i++) for (let j = 0; j < N1; j++) { const v = g[i * N1 + j]; if (!Number.isNaN(v) && Math.abs(v) > peak) peak = Math.abs(v); }
+    for (const level of [threshold * peak, -threshold * peak]) contour(level, 1);
   }
   return out;
 }

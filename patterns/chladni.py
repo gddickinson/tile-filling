@@ -66,22 +66,28 @@ class ChladniPattern(BasePattern):
                     grid[i][j] = math.cos(m * theta) * math.sin(n * math.pi * r)
 
         # Extract zero-contour lines using marching squares
-        self._marching_squares(commands, grid, res, ox, oy, size, threshold)
+        self._marching_squares(commands, grid, res, ox, oy, size)
+
+        # Line threshold: outline the band |f| < threshold * max|f| around the nodal lines (where sand would gather)
+        if threshold > 0:
+            peak = max((abs(v) for row in grid for v in row if not math.isnan(v)), default=0.0)
+            for level in (threshold * peak, -threshold * peak):
+                self._marching_squares(commands, grid, res, ox, oy, size, level, 1)
 
         return commands
 
-    def _marching_squares(self, commands, grid, res, ox, oy, size, threshold):
-        """Extract contour lines at z≈0 using marching squares algorithm."""
+    def _marching_squares(self, commands, grid, res, ox, oy, size, level=0.0, color_idx=0):
+        """Extract contour lines at z = level (default the nodal lines z = 0) using marching squares."""
         cell_w = size / res
         cell_h = size / res
 
         for i in range(res):
             for j in range(res):
                 # Get corners of this cell
-                v00 = grid[i][j]
-                v10 = grid[i + 1][j]
-                v01 = grid[i][j + 1]
-                v11 = grid[i + 1][j + 1]
+                v00 = grid[i][j] - level
+                v10 = grid[i + 1][j] - level
+                v01 = grid[i][j + 1] - level
+                v11 = grid[i + 1][j + 1] - level
 
                 # Skip NaN cells (circular mode outside disk)
                 if any(math.isnan(v) for v in [v00, v10, v01, v11]):
@@ -108,7 +114,6 @@ class ChladniPattern(BasePattern):
 
                 # Draw contour segments based on case
                 segments = self._case_segments(case)
-                color_idx = 0
 
                 for seg in segments:
                     if seg[0] in edges and seg[1] in edges:

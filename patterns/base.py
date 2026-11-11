@@ -3,10 +3,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple
 
-# Drawing command types
-# ("line", (x1, y1, x2, y2), color_index)
-# ("polygon", [(x1,y1), ...], color_index, fill)
-# ("circle", (cx, cy, r), color_index)
+# Drawing command types (the 4th element is optional)
+# ("line", (x1, y1, x2, y2), color_index[, weight])   weight: line-width multiplier, default 1
+# ("polygon", [(x1,y1), ...], color_index[, fill])     fill: True fills the polygon in its colour, default outline only
+# ("circle", (cx, cy, r), color_index[, weight])
 DrawCommand = Tuple[str, Any, int]
 
 

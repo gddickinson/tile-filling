@@ -11,7 +11,7 @@ export async function loadSetup() {
   return { patterns, palettes, spec, bySlug };
 }
 
-const fromArrays = ({ kind, col, xy }) => Object.assign(new Commands(), { kind, col, xy });
+const fromArrays = ({ kind, col, xy, ex }) => Object.assign(new Commands(), { kind, col, xy, ex });
 
 // Generator in a module worker; a new request supersedes (terminates) a running one so sliders stay responsive.
 export class Generator {

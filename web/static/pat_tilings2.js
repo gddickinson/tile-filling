@@ -196,6 +196,7 @@ export function hexagonal(width, height, params, margin = 40) {
 export function sierpinski(width, height, params, margin = 40) {
   const depth = get(params, 'depth', 5), mode = get(params, 'mode', 0), rotation = radians(get(params, 'rotation', 0));
   const out = new Commands();
+  out.fillLeaves = get(params, 'fill_mode', false);      // leaf shapes as filled polygons
   const cx = width / 2, cy = height / 2, size = Math.min(width, height) - 2 * margin;
   if (mode === 0) {
     const h = size * Math.sqrt(3) / 2;
@@ -220,6 +221,7 @@ export function sierpinski(width, height, params, margin = 40) {
 
 function triangle(out, p1, p2, p3, depth) {
   if (depth === 0) {
+    if (out.fillLeaves) { out.polygon([p1, p2, p3], 0, true); return; }
     out.line(p1[0], p1[1], p2[0], p2[1], 0); out.line(p2[0], p2[1], p3[0], p3[1], 0); out.line(p3[0], p3[1], p1[0], p1[1], 0);
     return;
   }
@@ -234,7 +236,11 @@ function square(out, x, y, s, c) {
 }
 
 function carpet(out, x, y, size, depth) {
-  if (depth === 0) { square(out, x, y, size, 0); return; }
+  if (depth === 0) {
+    if (out.fillLeaves) out.polygon([[x, y], [x + size, y], [x + size, y + size], [x, y + size]], 0, true);
+    else square(out, x, y, size, 0);
+    return;
+  }
   const s = size / 3;
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
@@ -246,6 +252,7 @@ function carpet(out, x, y, size, depth) {
 
 function hexagon(out, verts, depth) {
   if (depth === 0) {
+    if (out.fillLeaves) { out.polygon(verts, 0, true); return; }
     for (let i = 0; i < 6; i++) { const p = verts[i], q = verts[(i + 1) % 6]; out.line(p[0], p[1], q[0], q[1], 0); }
     return;
   }
