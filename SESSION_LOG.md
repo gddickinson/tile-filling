@@ -26,3 +26,14 @@
   into `TileFillingApp._apply_preset()` (tested with a real Tk window; skipped without a display).
 - README said "9 post-processing effects"; the app has 6 (kaleidoscope, bloom, vignette, chromatic aberration, scan
   lines, grain) plus glow and gradient line rendering. Corrected the README.
+
+### Needs George's decision (not changed)
+- Sliders that do nothing: Grid `line_weight`, Space-Filling `connect` and `rounded` (both branches draw straight
+  segments), Sierpinski `fill_mode`, Chladni `threshold`. Implement or remove? (The web About page says so.)
+- Penrose: `_extract_rhombs` pairs triangles into quadrilaterals `[a, b, a2, c]` that are not the P3 rhombs, so the
+  picture is a dense web rather than a clean Penrose tiling (matches `samples/penrose_ocean.png`). A correct P3 would change the look.
+- Apollonian "Classic" seed: the fourth circle `(cx, cy - 0.73 r, R - r)` is not tangent to the others, so the gasket
+  is not a true Apollonian packing.
+- Reaction-Diffusion with the default feed/kill dies out below about 48 x 48 resolution (empty picture); fine at the default 80.
+- GitHub repo description says "8 pattern types"; the app has 22.
+- Web: SVG export and the canvas-size field are web additions; the browser cannot write the 300 DPI tag.

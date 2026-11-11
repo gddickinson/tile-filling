@@ -49,6 +49,10 @@ route('about', async () => {
   no raster effects), a canvas-size field and shareable links to a pattern and palette. The browser cannot write the 300 DPI
   tag into PNGs. On the local web app the studio can also draw the current settings with the Python renderer.</p>
 
+  <p class="callout small">Faithful to the Python code, a few sliders currently change nothing: Grid "Line Weight",
+  Space-Filling "Connected Line" and "Rounded Corners", Sierpinski "Fill Outlines" and Chladni "Line Threshold" are read
+  (or defined) but not used by their generators.</p>
+
   <h2>Run it yourself</h2>
   <h3>Desktop app (tkinter)</h3>
   <pre>pip install Pillow
