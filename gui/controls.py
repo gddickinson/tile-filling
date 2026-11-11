@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from rendering.colors import PALETTES
-from rendering.settings import EFFECT_TOGGLES, KALEIDOSCOPE, LINE_WIDTH, RENDER_TOGGLES
+from rendering.settings import EFFECT_KEYS, EFFECT_TOGGLES, KALEIDOSCOPE, LINE_WIDTH, RENDER_TOGGLES
 
 
 class ControlPanel(ttk.Frame):
@@ -164,6 +164,14 @@ class ControlPanel(ttk.Frame):
             "scanlines": self.scanlines_var.get(),
             "grain": self.grain_var.get(),
         }
+
+    def set_render_settings(self, settings):
+        """Apply a get_render_settings()-style dict (e.g. from a preset); missing keys are left unchanged."""
+        for key in ["palette", "line_width"] + [k for k, _l, _d in RENDER_TOGGLES] + EFFECT_KEYS:
+            if key in settings:
+                getattr(self, f"{key}_var").set(settings[key])
+        if "kaleidoscope" in settings:
+            self.kal_label.config(text=str(int(settings["kaleidoscope"])))
 
     def get_pattern_name(self):
         return self.pattern_var.get()

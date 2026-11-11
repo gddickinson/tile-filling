@@ -66,7 +66,8 @@ FIX = ROOT / "tests" / "fixtures"
 
 
 def test_web_stack_does_not_import_tkinter():
-    assert "tkinter" not in sys.modules
+    code = "import sys; import web.app; sys.exit('tkinter' in sys.modules)"
+    assert subprocess.run([sys.executable, "-c", code], cwd=ROOT).returncode == 0
 
 
 def test_patterns_come_from_registry():

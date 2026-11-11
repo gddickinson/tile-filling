@@ -5,6 +5,7 @@ Run: python -m pytest -q tests/test_rendering.py   (the GUI test is skipped wher
 import sys
 from pathlib import Path
 
+import pytest
 from PIL import Image, ImageChops
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -40,3 +41,30 @@ def test_hires_export_draws_the_whole_pattern():
     # the grid spans the margin box 40..160 px at 1x, so 160..640 px at 4x (lines are 4 px wide)
     assert hires.size == (800, 800)
     assert all(abs(a - e) <= 4 for a, e in zip(bbox, (160, 160, 640, 640))), bbox
+
+
+def _tk_app():
+    try:
+        import tkinter
+        tkinter.Tk().destroy()
+    except Exception:  # no display (CI)
+        pytest.skip("no display for tkinter")
+    from gui.app import TileFillingApp
+    return TileFillingApp()
+
+
+def test_load_preset_restores_effects():
+    """Save Preset writes the kaleidoscope and effect settings; Load Preset used to ignore them."""
+    app = _tk_app()
+    try:
+        app._apply_preset({"pattern": "Truchet Tiles", "params": {"cols": 9},
+                           "settings": {"palette": "Gold", "line_width": 2.0, "glow": True, "gradient": False,
+                                        "kaleidoscope": 6, "gauss_glow": True, "vignette": True, "chromatic": False,
+                                        "scanlines": True, "grain": False}})
+        s = app.controls.get_render_settings()
+        assert app.controls.get_pattern_name() == "Truchet Tiles" and app.controls.get_params()["cols"] == 9
+        assert s["palette"] == "Gold" and s["line_width"] == 2.0 and s["glow"] is True
+        assert s["kaleidoscope"] == 6 and app.controls.kal_label.cget("text") == "6"
+        assert s["gauss_glow"] and s["vignette"] and s["scanlines"] and not s["chromatic"] and not s["grain"]
+    finally:
+        app.root.destroy()

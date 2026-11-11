@@ -246,6 +246,11 @@ class TileFillingApp:
         with open(path) as f:
             preset = json.load(f)
 
+        self._apply_preset(preset)
+        self.status_var.set(f"Loaded preset: {os.path.basename(path)}")
+
+    def _apply_preset(self, preset):
+        """Set pattern, parameters and all render/effect settings from a preset dict."""
         # Set pattern
         pattern_name = preset.get("pattern", "Grid")
         if pattern_name in PATTERN_REGISTRY:
@@ -265,18 +270,8 @@ class TileFillingApp:
                     else:
                         self.controls.param_widgets[lk].config(text=str(value))
 
-        # Set render settings
-        s = preset.get("settings", {})
-        if "palette" in s:
-            self.controls.palette_var.set(s["palette"])
-        if "line_width" in s:
-            self.controls.line_width_var.set(s["line_width"])
-        if "glow" in s:
-            self.controls.glow_var.set(s["glow"])
-        if "gradient" in s:
-            self.controls.gradient_var.set(s["gradient"])
-
-        self.status_var.set(f"Loaded preset: {os.path.basename(path)}")
+        # Set render settings (palette, line width, glow, gradient, kaleidoscope and every effect toggle)
+        self.controls.set_render_settings(preset.get("settings", {}))
         self._schedule_update()
 
     def _export_png(self):

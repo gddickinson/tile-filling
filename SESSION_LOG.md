@@ -21,3 +21,6 @@
 - Export Hi-Res PNG drew the pattern at its 1x coordinates into the top-left quarter of the 4x image (`render_high_res`
   scaled the canvas and line width but not the commands). Commands are now scaled with the new `scale_commands()`.
   The web hi-res export always scaled them.
+- Load Preset ignored the kaleidoscope and effect settings that Save Preset writes (only palette, line width, glow and
+  gradient were restored). New `ControlPanel.set_render_settings()` applies every saved setting; loading is factored
+  into `TileFillingApp._apply_preset()` (tested with a real Tk window; skipped without a display).
