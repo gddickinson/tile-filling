@@ -10,7 +10,9 @@ from PIL import Image, ImageChops
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from patterns import PATTERN_REGISTRY  # noqa: E402
 from rendering.effects import apply_noise_grain  # noqa: E402
+from rendering.renderer import render_high_res  # noqa: E402
 
 
 def _mean(img):
@@ -25,3 +27,16 @@ def test_film_grain_keeps_brightness():
     assert abs(_mean(out) - _mean(img)) < 2
     diff = ImageChops.difference(out, img).getextrema()
     assert all(lo == 0 and 0 < hi <= 20 for lo, hi in diff)
+
+
+def test_hires_export_draws_the_whole_pattern():
+    """Export Hi-Res PNG renders at 4x size: the pattern must be scaled too, not drawn 1x in the top-left corner."""
+    w = h = 200
+    params = {p["name"]: p["default"] for p in PATTERN_REGISTRY["Grid"].get_params()}
+    cmds = PATTERN_REGISTRY["Grid"]().generate(w, h, params)
+    hires = render_high_res(cmds, w, h, "Monochrome", 1.0, False, False, scale=4)
+    bg = Image.new("RGB", hires.size, hires.getpixel((0, 0)))
+    bbox = ImageChops.difference(hires, bg).getbbox()
+    # the grid spans the margin box 40..160 px at 1x, so 160..640 px at 4x (lines are 4 px wide)
+    assert hires.size == (800, 800)
+    assert all(abs(a - e) <= 4 for a, e in zip(bbox, (160, 160, 640, 640))), bbox

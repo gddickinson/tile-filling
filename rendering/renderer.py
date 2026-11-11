@@ -146,9 +146,9 @@ def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
 
 def render_high_res(commands, width, height, palette_name, line_width, glow, gradient,
                     scale=HIRES_SCALE, **effects):
-    """Render at high resolution for export."""
+    """Render at high resolution for export: `scale` x size and line width, the pattern scaled to fill it."""
     return render_to_image(
-        commands,
+        scale_commands(commands, scale),
         width * scale,
         height * scale,
         palette_name,
@@ -158,3 +158,16 @@ def render_high_res(commands, width, height, palette_name, line_width, glow, gra
         supersample=1,
         **effects,
     )
+
+
+def scale_commands(commands, scale):
+    """Multiply every coordinate (and circle radius) of a command list by `scale`."""
+    out = []
+    for cmd in commands:
+        kind, data = cmd[0], cmd[1]
+        if kind == "polygon":
+            data = [(x * scale, y * scale) for x, y in data]
+        else:
+            data = tuple(v * scale for v in data)
+        out.append((kind, data) + tuple(cmd[2:]))
+    return out

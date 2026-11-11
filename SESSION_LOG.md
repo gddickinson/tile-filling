@@ -18,3 +18,6 @@
 ### Bug fixes in the existing code (separate "Fix" commits, regression tests in `tests/test_rendering.py`)
 - Film grain halved the brightness of the whole image: `ImageChops.add(img, noise, scale=2, offset=-64)` is
   img/2 + v/2. Now `scale=1, offset=-128` (img + v, clipped). The web port follows.
+- Export Hi-Res PNG drew the pattern at its 1x coordinates into the top-left quarter of the 4x image (`render_high_res`
+  scaled the canvas and line width but not the commands). Commands are now scaled with the new `scale_commands()`.
+  The web hi-res export always scaled them.
