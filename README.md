@@ -1,6 +1,6 @@
 # Tile Filling Visualizer
 
-A Python GUI application for generating stunning mathematical and geometric art. 22 pattern types, 12 color palettes, 3D wireframe surfaces, 9 post-processing effects, and real-time parameter control with presets.
+A Python GUI application for generating stunning mathematical and geometric art. 22 pattern types, 12 color palettes, 3D wireframe surfaces, glow and gradient line rendering, 6 post-processing effects, and real-time parameter control with presets.
 
 ## Gallery
 

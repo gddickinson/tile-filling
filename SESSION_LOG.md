@@ -24,3 +24,5 @@
 - Load Preset ignored the kaleidoscope and effect settings that Save Preset writes (only palette, line width, glow and
   gradient were restored). New `ControlPanel.set_render_settings()` applies every saved setting; loading is factored
   into `TileFillingApp._apply_preset()` (tested with a real Tk window; skipped without a display).
+- README said "9 post-processing effects"; the app has 6 (kaleidoscope, bloom, vignette, chromatic aberration, scan
+  lines, grain) plus glow and gradient line rendering. Corrected the README.
