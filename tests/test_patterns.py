@@ -107,3 +107,55 @@ def test_apollonian_gasket_circles_touch_but_never_overlap():
             assert math.dist((x, y), (ox, oy)) + r <= R + tol
             for x2, y2, r2 in inner[i + 1:]:
                 assert math.dist((x, y), (x2, y2)) >= r + r2 - tol
+
+
+def _on_boundary(p, q, boundary, tol):
+    """Both points lie on one of the boundary segments."""
+    def on(pt, a, b):
+        ab = math.dist(a, b)
+        return abs(math.dist(a, pt) + math.dist(pt, b) - ab) < tol
+    return any(on(p, a, b) and on(q, a, b) for a, b in boundary)
+
+
+def test_penrose_is_a_p3_rhombus_tiling():
+    """Robinson triangles: one side length, golden-triangle angles, area conserved, every edge either shared by two
+    triangles or on the patch outline (no T-junctions); rhombs have 36/144 or 72/108 degree angles."""
+    from patterns.penrose import THICK, THIN, PenrosePattern
+    phi = (1 + 5 ** 0.5) / 2
+    pen = PenrosePattern()
+    area = lambda a, b, c: abs((b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])) / 2  # noqa: E731
+    angle = lambda v, p, q: math.degrees(math.acos(((p[0] - v[0]) * (q[0] - v[0]) + (p[1] - v[1]) * (q[1] - v[1]))  # noqa: E731
+                                                    / (math.dist(v, p) * math.dist(v, q))))
+    for shape in (0, 1):
+        initial = pen._initial_triangles(200, 200, 160, shape)
+        # outline of the starting patch: triangle edges used once
+        count = {}
+        for _t, a, b, c in initial:
+            for e in ((a, b), (b, c), (c, a)):
+                k = tuple(sorted((tuple(round(v, 6) for v in e[0]), tuple(round(v, 6) for v in e[1]))))
+                count[k] = count.get(k, 0) + 1
+        boundary = [k for k, n in count.items() if n == 1]
+        for n in (3, 5):
+            tris = pen.tiling(200, 200, 160, shape, n)
+            L = math.dist(tris[0][1], tris[0][2])
+            tol = 1e-6 * L
+            assert math.isclose(sum(area(a, b, c) for _t, a, b, c in tris), sum(area(a, b, c) for _t, a, b, c in initial),
+                                rel_tol=1e-9)
+            edges = {}
+            for t, a, b, c in tris:
+                assert abs(math.dist(a, b) - L) < tol and abs(math.dist(a, c) - L) < tol
+                assert abs(math.dist(b, c) - (L / phi if t == THIN else L * phi)) < tol
+                assert abs(angle(a, b, c) - (36 if t == THIN else 108)) < 1e-6
+                for e in ((a, b), (b, c), (c, a)):
+                    k = tuple(sorted((tuple(round(v, 6) for v in e[0]), tuple(round(v, 6) for v in e[1]))))
+                    edges[k] = edges.get(k, 0) + 1
+            assert all(m == 2 or (m == 1 and _on_boundary(*k, boundary, 1e-6 * L)) for k, m in edges.items())
+            rhombs, halves = pen._extract_rhombs(tris)
+            assert all(_on_boundary(b, c, boundary, 1e-6 * L) for _t, _a, b, c in halves)
+            for verts, t in rhombs:
+                assert all(abs(math.dist(verts[i], verts[(i + 1) % 4]) - L) < tol for i in range(4))
+                angles = sorted(round(angle(verts[i], verts[i - 1], verts[(i + 1) % 4]), 6) for i in range(4))
+                assert angles == ([36, 36, 144, 144] if t == THIN else [72, 72, 108, 108])
+            if n == 5 and shape == 0:
+                thick = sum(t == THICK for _v, t in rhombs)
+                assert abs(thick / (len(rhombs) - thick) - phi) < 0.05 * phi   # tile ratio tends to the golden ratio

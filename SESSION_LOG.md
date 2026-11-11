@@ -53,3 +53,11 @@
   Candidates are now kept only if they touch all three parents (`_tangent_to_all`). Default Classic: 3,852 commands,
   a true gasket. The "Four" seed's three inner circles overlap each other, so with the tangency check it now draws only
   its 4 seed circles: left for George (see the report).
+- Penrose: the old Robinson subdivision rules were not the P3 ones, so the "rhombs" were overlapping quadrilaterals (a
+  dense web; see the old `samples/penrose_ocean.png`). Rewritten with the standard Robinson-triangle subdivision
+  (thin 36 deg / thick 108 deg golden triangles, sides divided by the golden ratio); Sun = ten thin triangles, Star =
+  five thick rhombs at the centre (both halves list the long diagonal in the same order, otherwise the edge-matching
+  rule breaks and T-junctions appear). Half rhombs at the patch edge draw only their two sides. Test checks one side
+  length, golden-triangle angles, area conservation, every edge shared by two triangles or on the patch outline,
+  rhomb angles 36/144 and 72/108, and thick/thin -> golden ratio. Regenerated `samples/penrose_ocean.png` and
+  `samples/apollonian_gold.png` (defaults, with bloom for the gasket) with the fixed code.

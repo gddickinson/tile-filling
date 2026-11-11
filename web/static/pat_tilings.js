@@ -1,6 +1,6 @@
 // Classic tilings, part 1: line-by-line ports of patterns/grid.py, patterns/islamic.py and patterns/penrose.py.
 // Each generator is (width, height, params, margin) -> Commands, like BasePattern.generate.
-import { Commands, PHI, lerpPoint, mod, polygonVertices, pyRound, radians } from './pyutil.js';
+import { Commands, PHI, mod, polygonVertices, pyRound, radians } from './pyutil.js';
 import { random } from './pyrandom.js';
 
 const get = (params, k, d) => (params[k] ?? d);
@@ -135,47 +135,65 @@ function drawConnections(out, ox, oy, cell, gs, radius, n) {
   }
 }
 
-// --- penrose.py: PenrosePattern (Robinson triangle subdivision) ----------------------------------------------------
-const THIN = 0, THICK = 1;
+// --- penrose.py: PenrosePattern (P3 rhombus tiling by Robinson-triangle subdivision) ----------------------------------
+// Triangles [type, A, B, C]: THIN = apex 36 deg (half a thin rhomb, base = short diagonal), THICK = apex 108 deg (half a
+// thick rhomb, base = long diagonal). Two triangles of a type sharing base BC form one rhomb.
+export const THIN = 0, THICK = 1;
+const toward = (p, q, t) => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
 
 export function penrose(width, height, params, margin = 40) {
   const subdivisions = get(params, 'subdivisions', 5), drawTri = get(params, 'draw_triangles', false);
   const drawRhombs = get(params, 'draw_rhombs', true), initial = get(params, 'initial_shape', 0);
   const out = new Commands();
-  const cx = width / 2, cy = height / 2, size = Math.min(width, height) / 2 - margin;
-  let tris = [];
-  for (let i = 0; i < 10; i++) {
-    const a1 = (2 * i - 1) * Math.PI / 10, a2 = (2 * i + 1) * Math.PI / 10;
-    const b = [cx + size * Math.cos(a1), cy + size * Math.sin(a1)], c = [cx + size * Math.cos(a2), cy + size * Math.sin(a2)];
-    const type = initial === 0 ? THICK : THIN;
-    tris.push(i % 2 === 0 ? [type, [cx, cy], b, c] : [type, [cx, cy], c, b]);
-  }
-  for (let s = 0; s < subdivisions; s++) tris = subdivide(tris);
+  const tris = penroseTiling(width / 2, height / 2, Math.min(width, height) / 2 - margin, initial, subdivisions);
   const L = (a, b, k) => out.line(a[0], a[1], b[0], b[1], k);
   if (drawTri) {
     for (const [t, a, b, c] of tris) { const k = t === THICK ? 0 : 1; L(a, b, k); L(b, c, k); L(c, a, k); }
   }
   if (drawRhombs) {
-    for (const [verts, t] of extractRhombs(tris)) {
+    const [rhombs, halves] = extractRhombs(tris);
+    for (const [verts, t] of rhombs) {
       const k = t === THICK ? 0 : 1;
       for (let i = 0; i < 4; i++) L(verts[i], verts[(i + 1) % 4], k);
     }
+    for (const [t, a, b, c] of halves) { const k = t === THICK ? 0 : 1; L(a, b, k); L(a, c, k); }  // cut by the patch edge
   }
   return out;
 }
 
-function subdivide(tris) {
-  const res = [];
-  for (const [t, a, b, c] of tris) {
-    if (t === THICK) {
-      const p = lerpPoint(a, c, 1 / PHI), q = lerpPoint(b, a, 1 / PHI);
-      res.push([THICK, q, p, b], [THICK, p, q, a], [THIN, p, c, b]);
-    } else {
-      const r = lerpPoint(a, b, 1 / PHI);
-      res.push([THIN, r, c, a], [THICK, c, r, b]);
+export function penroseTiling(cx, cy, size, shape, subdivisions) {
+  let tris = [];
+  if (shape === 0) {                                       // Sun: ten thin triangles, neighbours mirrored
+    for (let i = 0; i < 10; i++) {
+      const a1 = (2 * i - 1) * Math.PI / 10, a2 = (2 * i + 1) * Math.PI / 10;
+      let b = [cx + size * Math.cos(a1), cy + size * Math.sin(a1)], c = [cx + size * Math.cos(a2), cy + size * Math.sin(a2)];
+      if (i % 2 === 0) [b, c] = [c, b];
+      tris.push([THIN, [cx, cy], b, c]);
+    }
+  } else {                                                 // Star: five thick rhombs meeting at the centre
+    const side = size / PHI;
+    for (let k = 0; k < 5; k++) {
+      const th = 2 * Math.PI * k / 5 - Math.PI / 2;
+      const tip = [cx + size * Math.cos(th), cy + size * Math.sin(th)];
+      const left = [cx + side * Math.cos(th - Math.PI / 5), cy + side * Math.sin(th - Math.PI / 5)];
+      const right = [cx + side * Math.cos(th + Math.PI / 5), cy + side * Math.sin(th + Math.PI / 5)];
+      tris.push([THICK, left, [cx, cy], tip], [THICK, right, [cx, cy], tip]);
     }
   }
-  return res;
+  for (let s = 0; s < subdivisions; s++) {
+    const res = [];
+    for (const [t, a, b, c] of tris) {
+      if (t === THIN) {
+        const p = toward(a, b, 1 / PHI);
+        res.push([THIN, c, p, b], [THICK, p, c, a]);
+      } else {
+        const q = toward(b, a, 1 / PHI), r = toward(b, c, 1 / PHI);
+        res.push([THICK, r, c, a], [THICK, q, r, b], [THIN, r, q, a]);
+      }
+    }
+    tris = res;
+  }
+  return tris;
 }
 
 function extractRhombs(tris) {
@@ -185,12 +203,10 @@ function extractRhombs(tris) {
     if (edgeMap.has(key)) {
       const other = edgeMap.get(key);
       if (!used.has(other) && !used.has(idx)) {
-        const a2 = tris[other][1];
-        rhombs.push([[a, b, a2, c], t]);
+        rhombs.push([[a, b, tris[other][1], c], t]);
         used.add(idx); used.add(other);
       }
     } else edgeMap.set(key, idx);
   });
-  tris.forEach(([t, a, b, c], idx) => { if (!used.has(idx)) rhombs.push([[a, b, c, a], t]); });
-  return rhombs;
+  return [rhombs, tris.filter((_, idx) => !used.has(idx))];
 }
