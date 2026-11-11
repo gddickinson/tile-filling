@@ -77,3 +77,33 @@ def test_chladni_threshold_outlines_the_nodal_band():
         nodal = [(c[1][0], c[1][1]) for c in zero]
         return sum(min(math.dist((c[1][0], c[1][1]), q) for q in nodal) for c in band[::7]) / len(band[::7])
     assert mean_dist(band25) > mean_dist(band05)
+
+
+def test_apollonian_classic_seed_is_tangent():
+    """Descartes: outer circle R, two circles R/2 side by side, so the fourth circle has radius R/3 at 2R/3 off-centre."""
+    from patterns.apollonian import ApollonianPattern
+    cx, cy, R = 200.0, 200.0, 160.0
+    outer, *inner = ApollonianPattern()._classic_seed(cx, cy, R)
+    assert outer == (cx, cy, -R)
+    for i, (x, y, r) in enumerate(inner):
+        assert math.isclose(math.dist((x, y), (cx, cy)), R - r, rel_tol=1e-12)          # inside the outer circle
+        for x2, y2, r2 in inner[i + 1:]:
+            assert math.isclose(math.dist((x, y), (x2, y2)), r + r2, rel_tol=1e-12)      # externally tangent
+
+
+def test_apollonian_gasket_circles_touch_but_never_overlap():
+    """Every circle drawn lies inside the outer circle and no two overlap (spurious Descartes roots used to add
+    circles crossing others and far off the canvas)."""
+    from patterns.apollonian import ApollonianPattern
+    for initial in (0, 1):
+        drawn = []
+        p = ApollonianPattern()
+        p._draw_circle = lambda commands, x, y, r, segments, color: drawn.append((x, y, r))
+        p.generate(400, 400, {"depth": 4, "initial": initial})
+        (ox, oy, R), inner = drawn[0], drawn[1:]
+        assert len(inner) > 40
+        tol = 1e-6 * R
+        for i, (x, y, r) in enumerate(inner):
+            assert math.dist((x, y), (ox, oy)) + r <= R + tol
+            for x2, y2, r2 in inner[i + 1:]:
+                assert math.dist((x, y), (x2, y2)) >= r + r2 - tol

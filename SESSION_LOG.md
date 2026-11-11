@@ -46,3 +46,10 @@
   Sierpinski "Fill Outlines" (leaf triangles/squares/hexagons as filled polygons; `polygon` commands now honour their
   documented `fill` flag); Chladni "Line Threshold" (extra contours in colour 1 at +-threshold x max|f|, outlining the
   band where sand gathers; the nodal lines are unchanged).
+- Apollonian: the Classic seed's fourth circle was `(cx, cy - 0.73 r, R - r)`, overlapping the others. By Descartes'
+  theorem (curvatures -1/R, 2/R, 2/R -> 3/R) it is now radius R/3 at 2R/3 above the centre. Also, `_descartes`
+  returned all four sign combinations of the complex formula, and only two of them are real tangent circles; the
+  spurious ones drew circles that crossed others or lay far off the canvas (most of the old 122k default commands).
+  Candidates are now kept only if they touch all three parents (`_tangent_to_all`). Default Classic: 3,852 commands,
+  a true gasket. The "Four" seed's three inner circles overlap each other, so with the tangency check it now draws only
+  its 4 seed circles: left for George (see the report).

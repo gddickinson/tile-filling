@@ -48,13 +48,17 @@ class ApollonianPattern(BasePattern):
         return commands
 
     def _classic_seed(self, cx, cy, R):
-        """Classic Apollonian: one big circle containing two medium circles."""
+        """Classic Apollonian: one big circle containing two medium circles and the circle tangent to all three.
+
+        Descartes' theorem with curvatures -1/R, 2/R, 2/R gives k4 = 3/R, so the fourth circle has radius R/3 and
+        sits 2R/3 above the centre (tangent to the outer circle and to both halves).
+        """
         r = R / 2
         return [
             (cx, cy, -R),  # Outer circle (negative curvature = containing)
             (cx - r, cy, r),
             (cx + r, cy, r),
-            (cx, cy - r * 0.73, R - r),  # Computed tangent circle
+            (cx, cy - 2 * R / 3, R / 3),  # Tangent to all three
         ]
 
     def _three_seed(self, cx, cy, R):
@@ -183,10 +187,18 @@ class ApollonianPattern(BasePattern):
                 x4 = z4.real
                 y4 = z4.imag
 
-                if abs(r4) > 0.1:
+                if abs(r4) > 0.1 and self._tangent_to_all((x4, y4, r4), (c1, c2, c3)):
                     results.append((x4, y4, r4))
 
         return results
+
+    @staticmethod
+    def _tangent_to_all(c4, parents, rtol=1e-6):
+        """Keep only real solutions: the complex Descartes formula pairs each curvature with two candidate centres,
+        and only one of them touches all three parent circles (signed radii: distance = |r_i + r_4|)."""
+        x4, y4, r4 = c4
+        tol = rtol * (abs(r4) + sum(abs(p[2]) for p in parents))
+        return all(abs(math.hypot(x4 - x, y4 - y) - abs(r + r4)) <= tol for x, y, r in parents)
 
     def _draw_circle(self, commands, cx, cy, r, segments, color_idx):
         """Draw a circle as line segments."""

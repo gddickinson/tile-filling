@@ -39,7 +39,7 @@ export function apollonian(width, height, params, margin = 40) {
   const out = new Commands();
   const cx = width / 2, cy = height / 2, R = Math.min(width, height) / 2 - margin;
   let circles;
-  if (initial === 0) { const r = R / 2; circles = [[cx, cy, -R], [cx - r, cy, r], [cx + r, cy, r], [cx, cy - r * 0.73, R - r]]; }
+  if (initial === 0) { const r = R / 2; circles = [[cx, cy, -R], [cx - r, cy, r], [cx + r, cy, r], [cx, cy - 2 * R / 3, R / 3]]; } // tangent (Descartes)
   else if (initial === 1) {
     const r = R / (1 + 2 / Math.sqrt(3)), off = R - r;
     circles = [[cx, cy, -R]];
@@ -102,10 +102,18 @@ function descartes([x1, y1, r1], [x2, y2, r2], [x3, y3, r3]) {
     const [sRe, sIm] = csqrt(prodRe, prodIm);
     for (const ps of [1, -1]) {
       const x4 = (sumRe + ps * 2 * sRe) / k4, y4 = (sumIm + ps * 2 * sIm) / k4;
-      if (Math.abs(r4) > 0.1) res.push([x4, y4, r4]);
+      if (Math.abs(r4) > 0.1 && tangentToAll(x4, y4, r4, [[x1, y1, r1], [x2, y2, r2], [x3, y3, r3]])) res.push([x4, y4, r4]);
     }
   }
   return res;
+}
+
+// apollonian._tangent_to_all: keep only candidates touching all three parents (signed radii: distance = |r_i + r_4|).
+function tangentToAll(x4, y4, r4, parents, rtol = 1e-6) {
+  let tol = Math.abs(r4);
+  for (const p of parents) tol += Math.abs(p[2]);
+  tol *= rtol;
+  return parents.every(([x, y, r]) => Math.abs(Math.hypot(x4 - x, y4 - y) - Math.abs(r + r4)) <= tol);
 }
 
 function circleSegs(out, cx, cy, r, segs, c) {
