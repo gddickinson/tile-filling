@@ -115,6 +115,27 @@ python main.py
 
 Requires Python 3 and tkinter (included with most Python installations).
 
+## Web app and GitHub Pages site
+
+The whole app also runs in the browser: **https://gddickinson.github.io/tile-filling/** (published from `main` by
+`.github/workflows/pages.yml`). All 22 generators, the renderer and the effects are ported to JavaScript and tested
+against the Python code, so the static site is the full app: every pattern, palette, line and effect setting, presets
+(interchangeable with the desktop JSON files), PNG, hi-res PNG and SVG export, the random batch and the keyboard
+shortcuts. Pattern parameters, palettes and render settings are read from the Python modules through the API.
+
+```bash
+pip install -r requirements-web.txt
+python run_web.py                 # http://127.0.0.1:8123 (adds "Render with Python" in the studio)
+python scripts/build_static.py    # static site in site/
+python -m pytest -q tests/        # API, static build, JS-vs-Python engine and effects tests
+```
+
+| Home | Studio |
+|------|--------|
+| ![Home](docs/img/home.png) | ![Studio](docs/img/studio_wireframe.png) |
+| **Gallery** | **Cross-check** |
+| ![Gallery](docs/img/gallery.png) | ![Cross-check](docs/img/check.png) |
+
 ## All 22 Pattern Types
 
 | Category | Patterns |

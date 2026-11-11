@@ -10,16 +10,15 @@ from PIL import ImageTk
 from patterns import PATTERN_REGISTRY
 from gui.controls import ControlPanel
 from rendering.renderer import render_to_image, render_high_res
+from rendering.settings import BATCH_COUNT, CANVAS_SIZE, EFFECT_KEYS, HIRES_DPI
 
-EFFECT_KEYS = ["kaleidoscope", "gauss_glow", "vignette", "chromatic", "scanlines", "grain"]
 PRESETS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "presets")
 
 
 class TileFillingApp:
     """Main GUI application."""
 
-    CANVAS_WIDTH = 800
-    CANVAS_HEIGHT = 800
+    CANVAS_WIDTH, CANVAS_HEIGHT = CANVAS_SIZE
 
     def __init__(self):
         self.root = tk.Tk()
@@ -319,7 +318,7 @@ class TileFillingApp:
                 gradient=settings["gradient"],
                 **self._get_effects(settings),
             )
-            img.save(path, dpi=(300, 300))
+            img.save(path, dpi=(HIRES_DPI, HIRES_DPI))
             self.status_var.set(f"Hi-res exported to {path}")
         except Exception as e:
             messagebox.showerror("Export Error", str(e))
@@ -333,8 +332,8 @@ class TileFillingApp:
         name = self.controls.get_pattern_name()
         pattern_cls = PATTERN_REGISTRY[name]
 
-        for i in range(10):
-            self.status_var.set(f"Batch rendering {i + 1}/10...")
+        for i in range(BATCH_COUNT):
+            self.status_var.set(f"Batch rendering {i + 1}/{BATCH_COUNT}...")
             self.root.update_idletasks()
 
             # Randomize params
@@ -357,7 +356,7 @@ class TileFillingApp:
             img = render_to_image(commands, w, h, palette_name=palette, line_width=1.0)
             img.save(os.path.join(folder, f"{name}_{i:02d}.png"))
 
-        self.status_var.set(f"Batch exported 10 images to {folder}")
+        self.status_var.set(f"Batch exported {BATCH_COUNT} images to {folder}")
 
     def run(self):
         self.root.mainloop()

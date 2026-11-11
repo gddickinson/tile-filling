@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 from rendering.colors import PALETTES
+from rendering.settings import EFFECT_TOGGLES, KALEIDOSCOPE, LINE_WIDTH, RENDER_TOGGLES
 
 
 class ControlPanel(ttk.Frame):
@@ -44,61 +45,40 @@ class ControlPanel(ttk.Frame):
         frame.pack(fill="x", pady=(10, 0))
 
         # Line width
-        ttk.Label(frame, text="Line Width").pack(anchor="w")
-        self.line_width_var = tk.DoubleVar(value=1.0)
-        lw_scale = ttk.Scale(frame, from_=0.5, to=5.0, variable=self.line_width_var,
+        ttk.Label(frame, text=LINE_WIDTH["label"]).pack(anchor="w")
+        self.line_width_var = tk.DoubleVar(value=LINE_WIDTH["default"])
+        lw_scale = ttk.Scale(frame, from_=LINE_WIDTH["min"], to=LINE_WIDTH["max"], variable=self.line_width_var,
                              orient="horizontal", command=lambda v: self.on_change("render"))
         lw_scale.pack(fill="x")
 
-        # Glow effect
-        self.glow_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Glow Effect", variable=self.glow_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
-
-        # Gradient coloring
-        self.gradient_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Gradient Colors", variable=self.gradient_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
+        # Glow effect, gradient coloring (self.glow_var, self.gradient_var)
+        self._build_toggles(frame, RENDER_TOGGLES)
 
         # Effects section
         fx_frame = ttk.LabelFrame(self, text="Effects", padding=5)
         fx_frame.pack(fill="x", pady=(10, 0))
 
         # Kaleidoscope
-        ttk.Label(fx_frame, text="Kaleidoscope Folds (0=off)").pack(anchor="w")
-        self.kaleidoscope_var = tk.IntVar(value=0)
+        ttk.Label(fx_frame, text=KALEIDOSCOPE["label"]).pack(anchor="w")
+        self.kaleidoscope_var = tk.IntVar(value=KALEIDOSCOPE["default"])
         kal_sub = ttk.Frame(fx_frame)
         kal_sub.pack(fill="x")
-        ttk.Scale(kal_sub, from_=0, to=12, variable=self.kaleidoscope_var,
+        ttk.Scale(kal_sub, from_=KALEIDOSCOPE["min"], to=KALEIDOSCOPE["max"], variable=self.kaleidoscope_var,
                   orient="horizontal",
                   command=lambda v: self._kal_changed(v)).pack(side="left", fill="x", expand=True)
-        self.kal_label = ttk.Label(kal_sub, text="0", width=3)
+        self.kal_label = ttk.Label(kal_sub, text=str(KALEIDOSCOPE["default"]), width=3)
         self.kal_label.pack(side="right")
 
-        # Gaussian glow
-        self.gauss_glow_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(fx_frame, text="Gaussian Bloom", variable=self.gauss_glow_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
+        # Gaussian bloom, vignette, chromatic aberration, scan lines, film grain (self.<key>_var)
+        self._build_toggles(fx_frame, EFFECT_TOGGLES)
 
-        # Vignette
-        self.vignette_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(fx_frame, text="Vignette", variable=self.vignette_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
-
-        # Chromatic aberration
-        self.chromatic_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(fx_frame, text="Chromatic Aberration", variable=self.chromatic_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
-
-        # Scan lines
-        self.scanlines_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(fx_frame, text="Scan Lines", variable=self.scanlines_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
-
-        # Noise grain
-        self.grain_var = tk.BooleanVar(value=False)
-        ttk.Checkbutton(fx_frame, text="Film Grain", variable=self.grain_var,
-                        command=lambda: self.on_change("render")).pack(anchor="w")
+    def _build_toggles(self, frame, specs):
+        """One checkbutton per (key, label, default) spec, stored as self.<key>_var."""
+        for key, label, default in specs:
+            var = tk.BooleanVar(value=default)
+            setattr(self, f"{key}_var", var)
+            ttk.Checkbutton(frame, text=label, variable=var,
+                            command=lambda: self.on_change("render")).pack(anchor="w")
 
     def _kal_changed(self, value):
         int_val = int(float(value))

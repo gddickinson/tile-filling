@@ -2,6 +2,7 @@
 
 from PIL import Image, ImageDraw
 from rendering.colors import PALETTES, get_line_color, gradient_color, hex_to_rgb
+from rendering.settings import EFFECT_STRENGTHS, SUPERSAMPLE, HIRES_SCALE
 
 
 def render_to_image(
@@ -12,7 +13,7 @@ def render_to_image(
     line_width=1.0,
     glow=False,
     gradient=False,
-    supersample=2,
+    supersample=SUPERSAMPLE,
     kaleidoscope=0,
     gauss_glow=False,
     vignette=False,
@@ -63,23 +64,23 @@ def render_to_image(
 
     if gauss_glow:
         from rendering.effects import apply_gaussian_glow
-        img = apply_gaussian_glow(img, radius=6, intensity=0.5)
+        img = apply_gaussian_glow(img, **EFFECT_STRENGTHS["gauss_glow"])
 
     if vignette:
         from rendering.effects import apply_vignette
-        img = apply_vignette(img, strength=0.6)
+        img = apply_vignette(img, **EFFECT_STRENGTHS["vignette"])
 
     if chromatic:
         from rendering.effects import apply_chromatic_aberration
-        img = apply_chromatic_aberration(img, offset=3)
+        img = apply_chromatic_aberration(img, **EFFECT_STRENGTHS["chromatic"])
 
     if scanlines:
         from rendering.effects import apply_scan_lines
-        img = apply_scan_lines(img, spacing=3, opacity=0.3)
+        img = apply_scan_lines(img, **EFFECT_STRENGTHS["scanlines"])
 
     if grain:
         from rendering.effects import apply_noise_grain
-        img = apply_noise_grain(img, amount=20)
+        img = apply_noise_grain(img, **EFFECT_STRENGTHS["grain"])
 
     return img
 
@@ -144,7 +145,7 @@ def _draw_glow_pass(draw, commands, palette, line_width, sw, sh, gradient, ss):
 
 
 def render_high_res(commands, width, height, palette_name, line_width, glow, gradient,
-                    scale=4, **effects):
+                    scale=HIRES_SCALE, **effects):
     """Render at high resolution for export."""
     return render_to_image(
         commands,

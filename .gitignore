@@ -3,3 +3,6 @@
 /rendering/__pycache__
 /utils/__pycache__
 .DS_Store
+site/
+__pycache__/
+.pytest_cache/
