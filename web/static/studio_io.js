@@ -47,7 +47,12 @@ export async function loadPresetFile({ setup, status }, file, applyState) {
   try {
     const p = JSON.parse(await file.text());
     const pattern = setup.patterns.find(x => x.name === (p.pattern || 'Grid'));
-    applyState({ pattern, params: p.params || {}, settings: p.settings || {} });
+    // numbers clamped to the slider range, as the desktop app does, so presets from older versions stay valid
+    const params = { ...(p.params || {}) };
+    for (const d of pattern.params) {
+      if ((d.type === 'int' || d.type === 'float') && typeof params[d.name] === 'number') params[d.name] = Math.min(Math.max(params[d.name], d.min), d.max);
+    }
+    applyState({ pattern, params, settings: p.settings || {} });
     status.textContent = `Loaded preset: ${file.name}`;
   } catch (e) {
     status.textContent = `Could not read preset: ${e.message}`;

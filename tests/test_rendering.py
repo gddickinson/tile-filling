@@ -68,3 +68,14 @@ def test_load_preset_restores_effects():
         assert s["gauss_glow"] and s["vignette"] and s["scanlines"] and not s["chromatic"] and not s["grain"]
     finally:
         app.root.destroy()
+
+
+def test_load_preset_clamps_old_values():
+    """A preset saved with the removed Apollonian "Four" seed (initial=2) loads as Three (the slider maximum)."""
+    app = _tk_app()
+    try:
+        app._apply_preset({"pattern": "Apollonian Gasket", "params": {"initial": 2, "depth": 99}, "settings": {}})
+        p = app.controls.get_params()
+        assert p["initial"] == 1 and p["depth"] == 8
+    finally:
+        app.root.destroy()

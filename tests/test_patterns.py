@@ -159,3 +159,10 @@ def test_penrose_is_a_p3_rhombus_tiling():
             if n == 5 and shape == 0:
                 thick = sum(t == THICK for _v, t in rhombs)
                 assert abs(thick / (len(rhombs) - thick) - phi) < 0.05 * phi   # tile ratio tends to the golden ratio
+
+
+def test_apollonian_four_seed_removed_and_old_value_falls_back_to_three():
+    """The "Four" seed (overlapping circles) is gone; initial=2 from old presets draws the Three seed."""
+    spec = next(p for p in PATTERN_REGISTRY["Apollonian Gasket"].get_params() if p["name"] == "initial")
+    assert spec["max"] == 1 and "Four" not in spec["label"]
+    assert gen("Apollonian Gasket", initial=2, depth=3) == gen("Apollonian Gasket", initial=1, depth=3)

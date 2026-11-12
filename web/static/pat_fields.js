@@ -40,17 +40,10 @@ export function apollonian(width, height, params, margin = 40) {
   const cx = width / 2, cy = height / 2, R = Math.min(width, height) / 2 - margin;
   let circles;
   if (initial === 0) { const r = R / 2; circles = [[cx, cy, -R], [cx - r, cy, r], [cx + r, cy, r], [cx, cy - 2 * R / 3, R / 3]]; } // tangent (Descartes)
-  else if (initial === 1) {
+  else {                                                   // 1 = Three (2 was the removed "Four" seed: falls back to Three)
     const r = R / (1 + 2 / Math.sqrt(3)), off = R - r;
     circles = [[cx, cy, -R]];
     for (let i = 0; i < 3; i++) { const a = i * 2 * Math.PI / 3 - Math.PI / 2; circles.push([cx + off * Math.cos(a), cy + off * Math.sin(a), r]); }
-  } else {
-    const r = R * 0.4;
-    circles = [[cx, cy, -R]];
-    for (let i = 0; i < 3; i++) {
-      const a = i * 2 * Math.PI / 3 - Math.PI / 2, d = R - r;
-      circles.push([cx + d * 0.6 * Math.cos(a), cy + d * 0.6 * Math.sin(a), r]);
-    }
   }
   for (const [x, y, r] of circles) circleSegs(out, x, y, Math.abs(r), segs, 0);
   fillGasket(out, circles, depth, minR, segs);

@@ -59,7 +59,7 @@ VARIANTS = [
     ("Isometric Cubes", {"height_mode": 2, "rotation": 20.0, "show_hidden": True}, None),
     *[("3D Wireframe", {"surface": s, "resolution": 12, "rot_z": 40.0}, None) for s in (1, 2, 3, 4)],
     ("Flow Field", {"particles": 100, "steps": 40, "octaves": 2, "seed": 3, "curl": 2.2}, None),
-    ("Apollonian Gasket", {"initial": 1, "depth": 4}, None), ("Apollonian Gasket", {"initial": 2, "depth": 4}, None),
+    ("Apollonian Gasket", {"initial": 1, "depth": 4}, None), ("Apollonian Gasket", {"initial": 2, "depth": 4}, None),  # old "Four" -> Three
     ("Chladni Figures", {"mode": 1, "resolution": 80, "m": 4, "n": 2}, None),
     ("Reaction-Diffusion", {"resolution": 40, "iterations": 800, "seed_count": 8, "contours": 2, "feed": 30, "kill": 57}, None),
 ]

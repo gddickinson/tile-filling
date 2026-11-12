@@ -259,9 +259,13 @@ class TileFillingApp:
             self.current_pattern = pattern_cls()
             self.controls.build_params(pattern_cls.get_params())
 
-        # Set params
+        # Set params (numbers clamped to the slider range, so values from older versions stay valid)
+        specs = {p["name"]: p for p in PATTERN_REGISTRY[self.controls.get_pattern_name()].get_params()}
         for name, value in preset.get("params", {}).items():
             if name in self.controls.param_vars:
+                spec = specs.get(name)
+                if spec and spec["type"] in ("int", "float") and isinstance(value, (int, float)):
+                    value = min(max(value, spec["min"]), spec["max"])
                 self.controls.param_vars[name].set(value)
                 lk = name + "_label"
                 if lk in self.controls.param_widgets:

@@ -17,7 +17,7 @@ class ApollonianPattern(BasePattern):
         return [
             {"name": "depth", "label": "Recursion Depth", "type": "int", "min": 1, "max": 8, "default": 5},
             {"name": "min_radius", "label": "Min Radius (px)", "type": "float", "min": 0.5, "max": 10.0, "default": 2.0},
-            {"name": "initial", "label": "Initial (0=Classic,1=Three,2=Four)", "type": "int", "min": 0, "max": 2, "default": 0},
+            {"name": "initial", "label": "Initial (0=Classic,1=Three)", "type": "int", "min": 0, "max": 1, "default": 0},
             {"name": "arc_segments", "label": "Circle Smoothness", "type": "int", "min": 16, "max": 64, "default": 36},
         ]
 
@@ -33,10 +33,8 @@ class ApollonianPattern(BasePattern):
 
         if initial == 0:
             circles = self._classic_seed(cx, cy, size)
-        elif initial == 1:
+        else:  # 1 = Three; 2 was "Four" (overlapping seed circles, removed), old presets fall back to Three
             circles = self._three_seed(cx, cy, size)
-        else:
-            circles = self._four_seed(cx, cy, size)
 
         # Draw initial circles
         for x, y, r in circles:
@@ -69,16 +67,6 @@ class ApollonianPattern(BasePattern):
         for i in range(3):
             angle = i * 2 * math.pi / 3 - math.pi / 2
             circles.append((cx + offset * math.cos(angle), cy + offset * math.sin(angle), r))
-        return circles
-
-    def _four_seed(self, cx, cy, R):
-        """Four circles: one big outer, three inner arranged in a triangle."""
-        r = R * 0.4
-        circles = [(cx, cy, -R)]
-        for i in range(3):
-            angle = i * 2 * math.pi / 3 - math.pi / 2
-            d = R - r
-            circles.append((cx + d * 0.6 * math.cos(angle), cy + d * 0.6 * math.sin(angle), r))
         return circles
 
     def _fill_gasket(self, commands, circles, max_depth, min_r, segments):

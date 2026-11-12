@@ -67,3 +67,8 @@
 - Still open for George: the Apollonian "Four" seed (three inner circles at 0.36 R from the centre with radius 0.4 R
   overlap each other, so no tangent circles exist and it now draws only its 4 seed circles; it was previously filled
   with spurious circles). Make it a tangent configuration (which would match "Three") or drop it?
+- Resolved (George): removed the Apollonian "Four" seed (overlapping circles; a tangent version would duplicate
+  "Three"). The `initial` slider is now 0=Classic, 1=Three; `initial=2` in old presets or calls draws Three. Loading a
+  preset (desktop `_apply_preset` and web studio) now clamps numeric parameters to the slider range, so presets from
+  older versions stay valid. Tests: `test_apollonian_four_seed_removed_and_old_value_falls_back_to_three`,
+  `test_load_preset_clamps_old_values`; the fixture's `initial=2` case checks the JS fallback.
